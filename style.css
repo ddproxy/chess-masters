@@ -1,5 +1,6 @@
 body {
-  background-color: black;
+  background: url('http://fullhdpictures.com/wp-content/uploads/2016/05/Fantastic-Chess-Wallpaper.jpg') no-repeat center center fixed;
+  background-size: cover;
 }
 
 h1 {
@@ -15,7 +16,6 @@ p {
 
 .full {
   position: absolute;
-  background-color: yellow;
   width: 100%;
   margin: auto;
   align-items: center;
@@ -23,7 +23,6 @@ p {
 
 .board {
   position: relative;
-  background-color: green;
   height: 640px;
   width: 640px;
   margin: auto;
@@ -35,4 +34,7 @@ p {
   width: 12.5%;
   height: 12.5%;
   float: left;
+  text-align: center;
+  padding: 25px;
+  color: white;
 }

@@ -37,6 +37,11 @@ p {
   text-align: center;
   font-size: 24px;
   text-shadow: 3px 3px 3px black;
-  padding: 25px;
   color: white;
+  align-items: center;
+}
+
+.chess-piece {
+  position: relative;
+  padding-top: 5px;
 }

@@ -33,6 +33,24 @@ $(document).ready(function() {
     };
 
     var Square = {};
+    id = 81;
+    for (var i = 0; i < 8; i++) {
+        for (var j = 0; j < 8; j++) {
+            Square[id] = {
+                location: $('#' + id),
+                status: {
+                    empty: true,
+                    black: false,
+                    white: false,
+                    piece: undefined
+                }
+            };
+            id++;
+        };
+        id = id - 18;
+    };
+    console.log(Square);
+
 
 
 

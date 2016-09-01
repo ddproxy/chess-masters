@@ -31,6 +31,8 @@ p {
 
 .square {
   border: 1px solid black;
-  width: 10px;
-  height: 10px;
+  background-color: white;
+  width: 12.5%;
+  height: 12.5%;
+  float: left;
 }

@@ -32,6 +32,7 @@ $(document).ready(function() {
         id = id - 18;
     };
 
+
     var Square = {};
     id = 81;
     for (var i = 0; i < 8; i++) {
@@ -42,7 +43,10 @@ $(document).ready(function() {
                     empty: true,
                     black: false,
                     white: false,
-                    piece: undefined
+                    piece: {
+                        name: undefined,
+                        img: undefined
+                    }
                 }
             };
             id++;

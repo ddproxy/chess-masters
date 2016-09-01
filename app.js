@@ -33,21 +33,42 @@ $(document).ready(function() {
     };
     // make piece object
     var piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
-    var Piece = {};
-    // loop for basic object structure
+    // piece constructer
+    var Piece = function (piece, svg, arr, color, start){
+      this.id = piece;
+      this.img = svg;
+      this.validIncrements = undefined;
+      this.moves = function (x){
+        this.validIncrements = x;
+      };
+      this.color = color;
+      this.start = function () {
+        Square[start].location.append($ '<img class="chess-piece" src="' + this.img + '" id="' + this.id + '" />')
+      };
+
+      this.moves(arr);
+      this.start();
+    }
+
+    // loop for making instances object structure
     for (var i = 0; i < piecesArray.length; i++) {
-      Piece[piecesArray[i]] = {
-        img: undefined,
-        validIncrements: [],
+      var chessPiece = piecesArray[i];
+      if(chessPiece === 'pawn'){
+        for (var j = 1; j < 9; j++) {
+          
+        }
       }
     }
     // valid increment arrays
-    Piece.pawn.validIncrements = [];
-    Piece.rook.validIncrements = [];
-    Piece.knight.validIncrements = [];
-    Piece.bishop.validIncrements = [];
-    Piece.queen.validIncrements = [];
-    Piece.king.validIncrements = [];
+    var pawnMoves = [10];
+    var pawnCaptureMoves = [9, 11];
+    var pawnFirstMoves = [20];
+    var rookMoves = [1, -1, 10, -10];
+    var knightMoves = [8, -8, 12, -12, 19, -19, 21, -21];
+    var bishopMoves = [9, -9, 11, -11];
+    var queenMoves = [1, -1, 9, -9, 10, -10, 11, -11];
+    var kingMoves = [1, -1, 9, -9, 10, -10, 11, -11];
+
 
 
     console.log(Piece);

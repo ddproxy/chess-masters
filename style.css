@@ -35,6 +35,8 @@ p {
   height: 12.5%;
   float: left;
   text-align: center;
+  font-size: 24px;
+  text-shadow: 3px 3px 3px black;
   padding: 25px;
   color: white;
 }

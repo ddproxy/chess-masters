@@ -1,7 +1,7 @@
 $(document).ready(function() {
+  // make the board
     var $board = $('.board');
     var id = 81;
-    // make the board
     for (var i = 0; i < 8; i++) {
         for (var j = 0; j < 8; j++) {
             $board.append('<div class="square" id="' + id + '"> ' + id + ' </div>');
@@ -31,8 +31,30 @@ $(document).ready(function() {
         };
         id = id - 18;
     };
+    // make piece object
+    var piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
+    var Piece = {};
+    // loop for basic object structure
+    for (var i = 0; i < piecesArray.length; i++) {
+      Piece[piecesArray[i]] = {
+        img: undefined,
+        validIncrements: [],
+      }
+    }
+    // valid increment arrays
+    Piece.pawn.validIncrements = [];
+    Piece.rook.validIncrements = [];
+    Piece.knight.validIncrements = [];
+    Piece.bishop.validIncrements = [];
+    Piece.queen.validIncrements = [];
+    Piece.king.validIncrements = [];
 
 
+    console.log(Piece);
+
+
+
+    // make square object
     var Square = {};
     id = 81;
     for (var i = 0; i < 8; i++) {
@@ -47,12 +69,14 @@ $(document).ready(function() {
                         name: undefined,
                         img: undefined
                     }
-                }
+                },
+                coordinates: '' + String.fromCharCode((0-i) + 104 ) + (j+1) + ''
             };
             id++;
         };
         id = id - 18;
     };
+
     console.log(Square);
 
 

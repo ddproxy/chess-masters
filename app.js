@@ -10,6 +10,9 @@ $(document).ready(function() {
   var $board = $('.board');
   var id = 81;
   var piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
+  var playerColor = "white";
+  var computerColor = "black";
+  var preMoveMode = false;
 
 
   // make the board
@@ -137,18 +140,37 @@ $(document).ready(function() {
             var loc = parseInt(event.target.getAttribute('id'));
             var square = Square[loc].location;
             var piece = Square[loc].piece.object;
+            $(".square").removeClass('highlighted');
 
-            piece.validIncrements.forEach(function(val){
-              if ()
 
-            })
+
+            piece.validIncrements.forEach(function(val, i){
+              var sqChkNum = loc + val;
+              while (sqChkNum < 100) {
+              if (sqChkNum > 10 && sqChkNum < 89 && sqChkNum % 10 !== 0 && (sqChkNum + 1) % 10 !== 0) {
+                Square[sqChkNum].location.addClass("highlighted");
+                sqChkNum += val;
+              } else {
+                break;
+              }
+            };
+            });
           });
 
 
 
+// (sqChkNum > 10 && sqChkNum < 89 && sqChkNum % 10 !== 0 && (sqChkNum + 1) % 10 !== 0) square number on the board
 
 
-
+          // try {
+          //   console.log(Square[(loc + val)]);
+          //
+          // } catch (e) {
+          //   console.log("square" + (loc + val) + "doesn't exist");
+          //
+          // } finally {
+          //
+          // }
 
 
 

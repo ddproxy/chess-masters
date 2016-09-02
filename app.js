@@ -197,6 +197,8 @@ $(document).ready(function() {
 
 
 
+
+
 // (sqChkNum > 10 && sqChkNum < 89 && sqChkNum % 10 !== 0 && (sqChkNum + 1) % 10 !== 0) square number on the board
 
 

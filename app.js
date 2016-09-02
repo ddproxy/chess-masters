@@ -66,7 +66,14 @@ $(document).ready(function() {
                     object: undefined,
                     jQuery: undefined,
                 },
-                coordinates: '' + String.fromCharCode((0 - i) + 104) + (j + 1) + ''
+                coordinates: '' + String.fromCharCode((0 - i) + 104) + (j + 1) + '',
+                setToEmpty: function(){
+                  this.status.empty = true;
+                  this.status.black = false;
+                  this.status.white = false;
+                  this.piece.object = undefined;
+                  this.piece.jQuery = undefined;
+                }
             };
             id++;
         };
@@ -138,10 +145,6 @@ $(document).ready(function() {
         }
     };
 
-
-    console.log(Square[12]);
-    console.log(Square[12].piece.object);
-
     function emptyOrDiffColor(chkNum, orig) {
         try {
             return !(Square[chkNum].piece.object.color === Square[orig].piece.object.color);
@@ -190,6 +193,30 @@ $(document).ready(function() {
                     sqChkNum += val;
                 }
             }
+        });
+
+        console.log(Square[22]);
+        console.log(Square[32]);
+
+        $(".highlighted").on('dblclick', function (event){
+          var newLoc = parseInt(event.target.getAttribute('id'))
+          $movingPiece = $($(square[0]).children()[0]);
+          $(this).empty();
+          $(this).append($movingPiece);
+          $movingPiece.fadeIn();
+          $(".square").removeClass('highlighted');
+          console.log(newLoc);
+          console.log(loc);
+          Square[newLoc].piece.object = Square[loc].piece.objecy
+          Square[newLoc].status = Square[loc].status;
+          Square[loc].setToEmpty();
+          console.log(Square[22]);
+          console.log(Square[32]);
+
+
+
+
+
         });
     });
 });

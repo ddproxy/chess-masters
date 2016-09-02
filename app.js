@@ -1,6 +1,8 @@
 $(document).ready(function() {
     var pawnMoves = [10];
+    var pawnMovesNegative = [-10];
     var pawnCaptureMoves = [9, 11];
+    var pawnCaptureMovesNegative = [-9, -11];
     var pawnFirstMoves = [20];
     var rookMoves = [1, -1, 10, -10];
     var knightMoves = [8, -8, 12, -12, 19, -19, 21, -21];
@@ -72,8 +74,9 @@ $(document).ready(function() {
     };
 
     // piece constructer
-    var Piece = function(id, color, svg, arr, start) {
+    var Piece = function(id, color, svg, arr, start, pieceType) {
         this.name = id;
+        this.type = pieceType;
         this.color = color;
         this.id = $('#' + id);
         this.img = svg;
@@ -99,45 +102,54 @@ $(document).ready(function() {
         if (chessPiece === 'pawn') {
             for (var j = 1; j < 9; j++) {
                 var name = 'whtpawn-' + j;
-                name = new Piece(name, "white", "./images/pieces/wht-pwn.png", pawnMoves, (20 + j));
+                name = new Piece(name, "white", "./images/pieces/wht-pwn.png", pawnMoves, (20 + j), "pawn");
             };
             for (var j = 1; j < 9; j++) {
                 var name = 'blkpawn-' + j;
-                name = new Piece(name, "black", "./images/pieces/blk-pawn.png", pawnMoves, (70 + j));
+                name = new Piece(name, "black", "./images/pieces/blk-pawn.png", pawnMovesNegative, (70 + j), "pawn");
             };
 
             // make rooks
         } else if (chessPiece === 'rook') {
-            var whtrook1 = new Piece('whtrook1', "white", "./images/pieces/wht-rook.png", rookMoves, 11);
-            var whtrook2 = new Piece('whtrook2', "white", "./images/pieces/wht-rook.png", rookMoves, 18);
-            var blkrook1 = new Piece('blkrook1', "black", "./images/pieces/blk-rook.png", rookMoves, 81);
-            var blkrook2 = new Piece('blkrook2', "black", "./images/pieces/blk-rook.png", rookMoves, 88);
+            var whtrook1 = new Piece('whtrook1', "white", "./images/pieces/wht-rook.png", rookMoves, 11, "rook");
+            var whtrook2 = new Piece('whtrook2', "white", "./images/pieces/wht-rook.png", rookMoves, 18, "rook");
+            var blkrook1 = new Piece('blkrook1', "black", "./images/pieces/blk-rook.png", rookMoves, 81, "rook");
+            var blkrook2 = new Piece('blkrook2', "black", "./images/pieces/blk-rook.png", rookMoves, 88, "rook");
             // make knight
         } else if (chessPiece === 'knight') {
-            var whtknight1 = new Piece('whtknight1', "white", "./images/pieces/wht-knight.png", knightMoves, 12);
-            var whtknight2 = new Piece('whtknight2', "white", "./images/pieces/wht-knight.png", knightMoves, 17);
-            var blkknight1 = new Piece('blkknight1', "black", "./images/pieces/blk-knight.png", knightMoves, 82);
-            var blkknight2 = new Piece('blkknight2', "black", "./images/pieces/blk-knight.png", knightMoves, 87);
+            var whtknight1 = new Piece('whtknight1', "white", "./images/pieces/wht-knight.png", knightMoves, 12, "knight");
+            var whtknight2 = new Piece('whtknight2', "white", "./images/pieces/wht-knight.png", knightMoves, 17, "knight");
+            var blkknight1 = new Piece('blkknight1', "black", "./images/pieces/blk-knight.png", knightMoves, 82, "knight");
+            var blkknight2 = new Piece('blkknight2', "black", "./images/pieces/blk-knight.png", knightMoves, 87, "knight");
             // make bishops
         } else if (chessPiece === 'bishop') {
-            var whtbishop1 = new Piece('whtbishop1', "white", "./images/pieces/wht-bishop.png", bishopMoves, 13);
-            var whtbishop2 = new Piece('whtbishop2', "white", "./images/pieces/wht-bishop.png", bishopMoves, 16);
-            var blkbishop1 = new Piece('blkbishop1', "black", "./images/pieces/blk-bishop.png", bishopMoves, 83);
-            var blkbishop2 = new Piece('blkbishop2', "black", "./images/pieces/blk-bishop.png", bishopMoves, 86);
+            var whtbishop1 = new Piece('whtbishop1', "white", "./images/pieces/wht-bishop.png", bishopMoves, 13, "bishop");
+            var whtbishop2 = new Piece('whtbishop2', "white", "./images/pieces/wht-bishop.png", bishopMoves, 16, "bishop");
+            var blkbishop1 = new Piece('blkbishop1', "black", "./images/pieces/blk-bishop.png", bishopMoves, 83, "bishop");
+            var blkbishop2 = new Piece('blkbishop2', "black", "./images/pieces/blk-bishop.png", bishopMoves, 86, "bishop");
             // make queens
         } else if (chessPiece === 'queen') {
-            var blkqueen = new Piece('blkqueen', "black", "./images/pieces/blk-queen.png", queenMoves, 84);
-            var whtqueen = new Piece('whtqueen', "white", "./images/pieces/wht-queen.png", queenMoves, 14);
+            var blkqueen = new Piece('blkqueen', "black", "./images/pieces/blk-queen.png", queenMoves, 84, "queen");
+            var whtqueen = new Piece('whtqueen', "white", "./images/pieces/wht-queen.png", queenMoves, 14, "queen");
             // make queens
         } else {
-            var whtking = new Piece('whtking', "white", "./images/pieces/wht-king.png", kingMoves, 15);
-            var blkking = new Piece('blkking', "black", "./images/pieces/blk-king.png", kingMoves, 85);
+            var whtking = new Piece('whtking', "white", "./images/pieces/wht-king.png", kingMoves, 15, "king");
+            var blkking = new Piece('blkking', "black", "./images/pieces/blk-king.png", kingMoves, 85, "king");
         }
     };
 
 
     console.log(Square[12]);
     console.log(Square[12].piece.object);
+
+    function emptyOrDiffColor(x) {
+        try {
+            return Square[x].piece.object.color === computerColor;
+        } catch (e) {
+            return true;
+        };
+    };
+
 
 
 
@@ -147,6 +159,9 @@ $(document).ready(function() {
         if (!(num > 10 && num < 89 && num % 10 !== 0 && (num + 1) % 10 !== 0)) {
             return false;
             // square contains a piece that is the same color as the clicked color
+
+        } else if (!(emptyOrDiffColor(num))) {
+            return false;
         } else {
             return true;
         }
@@ -164,14 +179,17 @@ $(document).ready(function() {
 
         piece.validIncrements.forEach(function(val, i) {
             var sqChkNum = loc + val;
-
-
-
-          
-            if (validSquare(sqChkNum)) {
-                Square[sqChkNum].location.addClass("highlighted");
+            while (validSquare(sqChkNum)) {
+                if (piece.type === "pawn" || piece.type === "king" || piece.type === "knight") {
+                    if (validSquare(sqChkNum)) {
+                        Square[sqChkNum].location.addClass("highlighted");
+                        sqChkNum = 100;
+                    }
+                } else {
+                    Square[sqChkNum].location.addClass("highlighted");
+                    sqChkNum += val;
+                }
             }
-
         });
     });
 });

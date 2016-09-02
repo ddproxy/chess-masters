@@ -45,3 +45,7 @@ p {
   position: relative;
   padding-top: 5px;
 }
+
+.highlighted {
+  border: 5px solid yellow;
+}

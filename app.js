@@ -132,6 +132,18 @@ $(document).ready(function() {
             }
           };
 
+          // highlight valid moves
+          $('.board').on('click','.square', function(event){
+            var loc = parseInt(event.target.getAttribute('id'));
+            var square = Square[loc].location;
+            var piece = Square[loc].piece.object;
+
+            piece.validIncrements.forEach(function(val){
+              if ()
+
+            })
+          });
+
 
 
 

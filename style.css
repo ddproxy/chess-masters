@@ -48,4 +48,5 @@ p {
 
 .highlighted {
   border: 5px solid yellow;
+  transition: border 80ms;
 }

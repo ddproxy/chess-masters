@@ -142,9 +142,9 @@ $(document).ready(function() {
     console.log(Square[12]);
     console.log(Square[12].piece.object);
 
-    function emptyOrDiffColor(x) {
+    function emptyOrDiffColor(chkNum, orig) {
         try {
-            return Square[x].piece.object.color === computerColor;
+            return !(Square[chkNum].piece.object.color === Square[orig].piece.object.color);
         } catch (e) {
             return true;
         };
@@ -153,14 +153,14 @@ $(document).ready(function() {
 
 
 
-    function validSquare(num) {
+    function validSquare(chkNum, orig) {
 
         // not a square on the board return false
-        if (!(num > 10 && num < 89 && num % 10 !== 0 && (num + 1) % 10 !== 0)) {
+        if (!(chkNum > 10 && chkNum < 89 && chkNum % 10 !== 0 && (chkNum + 1) % 10 !== 0)) {
             return false;
             // square contains a piece that is the same color as the clicked color
 
-        } else if (!(emptyOrDiffColor(num))) {
+        } else if (!(emptyOrDiffColor(chkNum, orig))) {
             return false;
         } else {
             return true;
@@ -179,7 +179,7 @@ $(document).ready(function() {
 
         piece.validIncrements.forEach(function(val, i) {
             var sqChkNum = loc + val;
-            while (validSquare(sqChkNum)) {
+            while (validSquare(sqChkNum, loc)) {
                 if (piece.type === "pawn" || piece.type === "king" || piece.type === "knight") {
                     if (validSquare(sqChkNum)) {
                         Square[sqChkNum].location.addClass("highlighted");

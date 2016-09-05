@@ -15,6 +15,7 @@ $(document).ready(function() {
     var playerColor = "white";
     var computerColor = "black";
     var preMoveMode = false;
+    var dragged;
 
 
     // make the board
@@ -89,12 +90,20 @@ $(document).ready(function() {
         this.img = svg;
         this.validIncrements = arr;
         this.start = function() {
-            Square[start].location.append($('<img class="chess-piece" src="' + this.img + '" id="' + start + '" />'));
+            Square[start].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + start + '" />'));
             Square[start].status[color] = true;
             Square[start].status.empty = false;
             Square[start].piece.object = this;
             Square[start].piece.jQuery = this.id;
         };
+        this.drop = function (num) {
+          Square[num].status[color] = true;
+          Square[num].status.empty = false;
+          Square[num].piece.object = this;
+          Square[num].piece.jQuery = this.id;
+          this.moveCounter++;
+          this.coordinates = Square[num].coordinates;
+        }
         this.start();
         this.moveCounter = 0;
         this.coordinates = Square[start].coordinates;
@@ -171,58 +180,67 @@ $(document).ready(function() {
     };
 
     // highlight valid moves
-    $('.board').on('click', '.square', function(event) {
-        var loc = parseInt(event.target.getAttribute('id'));
-        var square = Square[loc].location;
-        var piece = Square[loc].piece.object;
-        var color = Square[loc].piece.object.color
-        $(".square").removeClass('highlighted');
-
-
-
-        piece.validIncrements.forEach(function(val, i) {
-            var sqChkNum = loc + val;
-            while (validSquare(sqChkNum, loc)) {
-                if (piece.type === "pawn" || piece.type === "king" || piece.type === "knight") {
-                    if (validSquare(sqChkNum)) {
-                        Square[sqChkNum].location.addClass("highlighted");
-                        sqChkNum = 100;
-                    }
-                } else {
-                    Square[sqChkNum].location.addClass("highlighted");
-                    sqChkNum += val;
-                }
-            }
-        });
-
-        console.log(Square[22]);
-        console.log(Square[32]);
-
-        $(".highlighted").on('dblclick', function(event) {
-            var newLoc = parseInt(event.target.getAttribute('id'))
-            $movingPiece = $($(square[0]).children()[0]);
-            $(this).empty();
-            $(this).append($movingPiece);
-            $movingPiece.fadeIn();
+    $('.board').on('mouseenter', '.square', function(event) {
+        try {
+            var loc = parseInt(event.target.getAttribute('id'));
+            var square = Square[loc].location;
+            var piece = Square[loc].piece.object;
+            var color = Square[loc].piece.object.color
             $(".square").removeClass('highlighted');
-            console.log(newLoc);
-            console.log(loc);
-            Square[newLoc].piece.object = Square[loc].piece.objecy
-            Square[newLoc].status = Square[loc].status;
-            Square[loc].setToEmpty();
-            console.log(Square[22]);
-            console.log(Square[32]);
-        });
+
+            piece.validIncrements.forEach(function(val, i) {
+                var sqChkNum = loc + val;
+                while (validSquare(sqChkNum, loc)) {
+                    if (piece.type === "pawn" || piece.type === "king" || piece.type === "knight") {
+                        if (validSquare(sqChkNum)) {
+                            Square[sqChkNum].location.addClass("highlighted");
+                            sqChkNum = 100;
+                        }
+                    } else {
+                        Square[sqChkNum].location.addClass("highlighted");
+                        sqChkNum += val;
+                    }
+                }
+            });
+
+        } catch (e) {
+        }
     });
+
+    $('.board').on('dragstart', function(event) {
+      dragged = event.target;
+      console.log(dragged);
+      dragged.style.opacity = .5
+
+    });
+    $('.board').on('dragend', function(event) {
+      dragged.style.opacity = .5
+    });
+    $('.board').on('dragover', function(event) {
+      event.preventDefault();
+    });
+
+    $('.square').on('drop', function(event) {
+      event.preventDefault();
+      console.log(event.target);
+      console.log(newloc);
+      console.log(oldLoc);
+
+      if (event.target.classList.contains('highlighted') === true){
+        dragged.parentNode.removeChild(dragged);
+        event.target.appendChild(dragged);
+      }
+    });
+
+
+
+
+
+
+
+    // this is the closing tag
 });
-
-
-
-
-
-
 // (sqChkNum > 10 && sqChkNum < 89 && sqChkNum % 10 !== 0 && (sqChkNum + 1) % 10 !== 0) square number on the board
-
 
 // try {
 //   console.log(Square[(loc + val)]);

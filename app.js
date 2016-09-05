@@ -12,10 +12,10 @@ $(document).ready(function() {
     var $board = $('.board');
     var id = 81;
     var piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
-    var playerColor = "white";
+    var turn = "white";
     var computerColor = "black";
-    var preMoveMode = false;
     var dragged;
+    var oldEvent;
 
 
     // make the board
@@ -96,13 +96,13 @@ $(document).ready(function() {
             Square[start].piece.object = this;
             Square[start].piece.jQuery = this.id;
         };
-        this.drop = function (num) {
-          Square[num].status[color] = true;
-          Square[num].status.empty = false;
-          Square[num].piece.object = this;
-          Square[num].piece.jQuery = this.id;
-          this.moveCounter++;
-          this.coordinates = Square[num].coordinates;
+        this.drop = function(num) {
+            Square[num].status[color] = true;
+            Square[num].status.empty = false;
+            Square[num].piece.object = this;
+            Square[num].piece.jQuery = this.id;
+            this.moveCounter++;
+            this.coordinates = Square[num].coordinates;
         }
         this.start();
         this.moveCounter = 0;
@@ -179,6 +179,18 @@ $(document).ready(function() {
         }
     };
 
+    function colorChecker(e) {
+        try {
+            var num = parseInt(e.target.getAttribute('id'));
+            var color = Square[num].piece.object.color;
+            return (color === turn);
+
+        } catch (e) {
+            console.log('empty');
+        }
+    };
+
+
     // highlight valid moves
     $('.board').on('mouseenter', '.square', function(event) {
         try {
@@ -187,52 +199,95 @@ $(document).ready(function() {
             var piece = Square[loc].piece.object;
             var color = Square[loc].piece.object.color
             $(".square").removeClass('highlighted');
+            $(".square").removeClass('capture');
+
 
             piece.validIncrements.forEach(function(val, i) {
                 var sqChkNum = loc + val;
                 while (validSquare(sqChkNum, loc)) {
                     if (piece.type === "pawn" || piece.type === "king" || piece.type === "knight") {
-                        if (validSquare(sqChkNum)) {
+                        if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
                             Square[sqChkNum].location.addClass("highlighted");
                             sqChkNum = 100;
+                        } else {
+                            Square[sqChkNum].location.addClass("capture");
+                            sqChkNum = 100;
                         }
+
                     } else {
-                        Square[sqChkNum].location.addClass("highlighted");
-                        sqChkNum += val;
+                        if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                            Square[sqChkNum].location.addClass("highlighted");
+                            sqChkNum += val;
+                        } else {
+                            Square[sqChkNum].location.addClass("capture");
+                            sqChkNum = 100;
+                        }
                     }
                 }
             });
 
         } catch (e) {
+            $(".square").removeClass('highlighted');
+            $(".square").removeClass('capture');
         }
     });
 
     $('.board').on('dragstart', function(event) {
-      dragged = event.target;
-      console.log(dragged);
-      dragged.style.opacity = .5
+        oldEvent = event;
+        dragged = event.target;
+        if (colorChecker(event)) {
+            dragged.style.opacity = .5;
+        } else {}
+    });
 
-    });
     $('.board').on('dragend', function(event) {
-      dragged.style.opacity = .5
+        dragged.style.opacity = 1;
     });
+
     $('.board').on('dragover', function(event) {
-      event.preventDefault();
+        event.preventDefault();
     });
 
     $('.square').on('drop', function(event) {
-      event.preventDefault();
-      console.log(event.target);
-      console.log(newloc);
-      console.log(oldLoc);
+        if (colorChecker(oldEvent)) {
+            event.preventDefault();
+            var oldLoc = parseInt(dragged.getAttribute('id'));
+            var newLoc = parseInt(event.target.getAttribute('id'));
+            if (event.target.classList.contains('highlighted')) {
 
-      if (event.target.classList.contains('highlighted') === true){
-        dragged.parentNode.removeChild(dragged);
-        event.target.appendChild(dragged);
-      }
+                dragged.parentNode.removeChild(dragged);
+                event.target.appendChild(dragged);
+                dragged.setAttribute('id', newLoc)
+                Square[oldLoc].piece.object.drop(newLoc);
+                Square[oldLoc].setToEmpty();
+                $(".square").removeClass('highlighted');
+                $(".square").removeClass('capture');
+                if (turn === 'white') {
+                    turn = 'black';
+                } else {
+                    turn = 'white';
+                }
+            } else if (event.target.classList.contains('chess-piece')) {
+                console.log('this is a capture move');
+                dragged.parentNode.removeChild(dragged);
+                $(event.target).hide();
+                event.target.parentNode.appendChild(dragged);
+                $(event.target).remove();
+                dragged.setAttribute('id', newLoc);
+                Square[oldLoc].piece.object.drop(newLoc);
+                Square[oldLoc].setToEmpty();
+                $(".square").removeClass('highlighted');
+                $(".square").removeClass('capture');
+                if (turn === 'white') {
+                    turn = 'black';
+                } else {
+                    turn = 'white';
+                }
+            }
+        } else {
+            console.log("Not your turn");
+        }
     });
-
-
 
 
 

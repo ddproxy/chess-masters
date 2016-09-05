@@ -267,6 +267,8 @@ $(document).ready(function() {
                 } else {
                     turn = 'white';
                 }
+            } else if (event.target == dragged) {
+                dragged.style.opacity = 1;
             } else if (event.target.classList.contains('chess-piece')) {
                 console.log('this is a capture move');
                 dragged.parentNode.removeChild(dragged);
@@ -285,7 +287,7 @@ $(document).ready(function() {
                 }
             }
         } else {
-            console.log("Not your turn");
+            alert("Not your turn");
         }
     });
 

@@ -204,9 +204,7 @@ $(document).ready(function() {
     $('.board').on('mouseenter', '.square', function(event) {
         try {
             var loc = parseInt(event.target.getAttribute('id'));
-            var square = Square[loc].location;
             var piece = Square[loc].piece.object;
-            var color = Square[loc].piece.object.color
             $(".square").removeClass('highlighted');
             $(".square").removeClass('capture');
 
@@ -214,7 +212,7 @@ $(document).ready(function() {
                 var sqChkNum = loc + val;
                 while (validSquare(sqChkNum, loc)) {
                     if (piece.type === "king" || piece.type === "knight") {
-                        if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
                             Square[sqChkNum].location.addClass("highlighted");
                             sqChkNum = 100;
                         } else {
@@ -223,11 +221,11 @@ $(document).ready(function() {
                         }
 
                     } else if (piece.type === "pawn" && val % 10 === 0) {
-                        if (piece.moveCounter < 1 && validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                        if (piece.moveCounter < 1 && validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
                             Square[sqChkNum].location.addClass("highlighted");
                             Square[(sqChkNum + val)].location.addClass("highlighted");
                             sqChkNum = 100;
-                        } else if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                        } else if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
                             Square[sqChkNum].location.addClass("highlighted");
                             sqChkNum = 100;
                         } else {
@@ -235,7 +233,7 @@ $(document).ready(function() {
                         }
 
                     } else if (piece.type === "pawn" && val % 10 !== 0) {
-                        if (validSquare(sqChkNum)) {
+                        if (validSquare(sqChkNum, loc)) {
                             if (!(Square[sqChkNum].status.empty)) {
                                 Square[sqChkNum].location.addClass("capture");
                                 sqChkNum = 100;
@@ -246,7 +244,7 @@ $(document).ready(function() {
                             sqChkNum = 100;
                         }
                     } else {
-                        if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
                             Square[sqChkNum].location.addClass("highlighted");
                             sqChkNum += val;
                         } else {
@@ -263,7 +261,6 @@ $(document).ready(function() {
         }
     });
 
-    console.log(blkqueen);
     //dragging pieces
     $('.board').on('dragstart', '.chess-piece', function(event) {
         oldEvent = event;
@@ -375,7 +372,7 @@ $(document).ready(function() {
                 var sqChkNum = loc + val;
                 while (validSquare(sqChkNum, loc)) {
                     if (piece.type === "king" || piece.type === "knight") {
-                        if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
                             sqChkNum = 100;
                         } else {
                             threatToArray.push(Square[sqChkNum].piece.object);
@@ -386,7 +383,7 @@ $(document).ready(function() {
                         sqChkNum = 100;
 
                     } else if (piece.type === "pawn" && val % 10 !== 0) {
-                        if (validSquare(sqChkNum)) {
+                        if (validSquare(sqChkNum, loc)) {
                             if (!(Square[sqChkNum].status.empty)) {
                                 threatToArray.push(Square[sqChkNum].piece.object);
                                 sqChkNum = 100;
@@ -397,7 +394,7 @@ $(document).ready(function() {
                             sqChkNum = 100;
                         }
                     } else {
-                        if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
                             sqChkNum += val;
                         } else {
                             threatToArray.push(Square[sqChkNum].piece.object);

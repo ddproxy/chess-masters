@@ -7,12 +7,16 @@ $(document).ready(function() {
     var queenMoves = [1, -1, 9, -9, 10, -10, 11, -11];
     var kingMoves = [1, -1, 9, -9, 10, -10, 11, -11];
     var $board = $('.board');
+    var blackPieces = [];
+    var whitePieces = [];
     var id = 81;
     var piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
     var turn = "white";
     var computerColor = "black";
+    var odd = true;
     var dragged;
     var oldEvent;
+    var Square = {};
 
     //create the turn banner
     $('.turn-billboard').text(turn);
@@ -28,7 +32,6 @@ $(document).ready(function() {
 
     // give it the right backgrounds
     id = 81;
-    var odd = true;
     for (var i = 0; i < 8; i++) {
         odd = !odd;
         for (var j = 0; j < 8; j++) {
@@ -51,7 +54,6 @@ $(document).ready(function() {
 
 
     // make square object
-    var Square = {};
     id = 81;
     for (var i = 0; i < 8; i++) {
         for (var j = 0; j < 8; j++) {
@@ -88,6 +90,7 @@ $(document).ready(function() {
         this.id = $('#' + id);
         this.img = svg;
         this.validIncrements = arr;
+        this.square = Square[start];
         this.start = function() {
             Square[start].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + start + '" />'));
             Square[start].status[color] = true;
@@ -96,16 +99,25 @@ $(document).ready(function() {
             Square[start].piece.jQuery = this.id;
         };
         this.drop = function(num) {
+            this.square = Square[num];
             Square[num].status[color] = true;
             Square[num].status.empty = false;
             Square[num].piece.object = this;
             Square[num].piece.jQuery = this.id;
             this.moveCounter++;
             this.coordinates = Square[num].coordinates;
+
         }
         this.start();
         this.moveCounter = 0;
         this.coordinates = Square[start].coordinates;
+        this.threatining = undefined;
+        this.threatenedBy = undefined;
+        if (this.color === "white") {
+            whitePieces.push(this);
+        } else {
+            blackPieces.push(this);
+        };
     };
 
     // add pieces to the board loop maybe wrap this in a function later
@@ -146,7 +158,7 @@ $(document).ready(function() {
         } else if (chessPiece === 'queen') {
             var blkqueen = new Piece('blkqueen', "black", "./images/pieces/blk-queen.png", queenMoves, 84, "queen");
             var whtqueen = new Piece('whtqueen', "white", "./images/pieces/wht-queen.png", queenMoves, 14, "queen");
-            // make queens
+            // make kings
         } else {
             var whtking = new Piece('whtking', "white", "./images/pieces/wht-king.png", kingMoves, 15, "king");
             var blkking = new Piece('blkking', "black", "./images/pieces/blk-king.png", kingMoves, 85, "king");
@@ -161,8 +173,6 @@ $(document).ready(function() {
             return true;
         };
     };
-
-
 
     //is a square a square on the board, empty or has an opponents color on it
     function validSquare(chkNum, orig) {
@@ -248,33 +258,35 @@ $(document).ready(function() {
             });
 
         } catch (e) {
-            throw 'That square is empty'
             $(".square").removeClass('highlighted');
             $(".square").removeClass('capture');
         }
     });
 
-
+    console.log(blkqueen);
     //dragging pieces
-    $('.board').on('dragstart', function(event) {
+    $('.board').on('dragstart', '.chess-piece', function(event) {
         oldEvent = event;
         dragged = event.target;
         if (colorChecker(event)) {
             dragged.style.opacity = .5;
-        } else {}
+        }
     });
 
+    //original opacity when dropped
     $('.board').on('dragend', function(event) {
+        event.preventDefault();
         dragged.style.opacity = 1;
     });
 
+    //dim while dragging
     $('.board').on('dragover', function(event) {
         event.preventDefault();
     });
 
 
     //dropping the piece is the event that changes most of the game state
-    $('.square').on('drop', function(event) {
+    $('.board').on('drop', function(event) {
         if (colorChecker(oldEvent)) {
             event.preventDefault();
             var oldLoc = parseInt(dragged.getAttribute('id'));
@@ -291,15 +303,23 @@ $(document).ready(function() {
                 if (turn === 'white') {
                     turn = 'black';
                     $('.turn-billboard').text(turn);
-                    $('.turn-billboard').css({'background-color': 'gray','color':'black', 'text-shadow': '3px -3px 10px white'});
+                    $('.turn-billboard').css({
+                        'background-color': 'gray',
+                        'color': 'black',
+                        'text-shadow': '3px -3px 10px white'
+                    });
                 } else {
                     turn = 'white';
                     $('.turn-billboard').text(turn);
-                    $('.turn-billboard').css({'background-color': 'gray','color':'white', 'text-shadow': '3px -3px 10px black'});
+                    $('.turn-billboard').css({
+                        'background-color': 'gray',
+                        'color': 'white',
+                        'text-shadow': '3px -3px 10px black'
+                    });
                 }
             } else if (event.target == dragged) {
                 dragged.style.opacity = 1;
-            } else if (event.target.classList.contains('chess-piece')) {
+            } else if (event.target.classList.contains('chess-piece') && event.target.parentNode.classList.contains('capture')) {
                 dragged.parentNode.removeChild(dragged);
                 $(event.target).hide();
                 event.target.parentNode.appendChild(dragged);
@@ -312,17 +332,121 @@ $(document).ready(function() {
                 if (turn === 'white') {
                     turn = 'black';
                     $('.turn-billboard').text(turn);
-                    $('.turn-billboard').css({'background-color': 'gray','color':'black', 'text-shadow': '3px -3px 10px white'});
+                    $('.turn-billboard').css({
+                        'background-color': 'gray',
+                        'color': 'black',
+                        'text-shadow': '3px -3px 10px white'
+                    });
                 } else {
                     turn = 'white';
                     $('.turn-billboard').text(turn);
-                    $('.turn-billboard').css({'background-color': 'gray','color':'white', 'text-shadow': '3px -3px 10px black'});
+                    $('.turn-billboard').css({
+                        'background-color': 'gray',
+                        'color': 'white',
+                        'text-shadow': '3px -3px 10px black'
+                    });
                 }
 
+
             }
+            allPieceCheck();
+            checkForCheck();
+
         } else {
             $('.turn-billboard').text("Not Your Turn");
-            $('.turn-billboard').css({'background-color': 'red','color':'black', 'text-shadow': '3px -3px 10px white'});
+            $('.turn-billboard').css({
+                'background-color': 'red',
+                'color': 'black',
+                'text-shadow': '3px -3px 10px white'
+            });
         }
+
+
     });
+
+    //function that creates a threatning array for a piece
+    var threatTo = function(piece) {
+        var threatToArray = [];
+        var loc = parseInt(piece.square.location[0].getAttribute('id'));
+
+        try {
+
+            piece.validIncrements.forEach(function(val, i) {
+                var sqChkNum = loc + val;
+                while (validSquare(sqChkNum, loc)) {
+                    if (piece.type === "king" || piece.type === "knight") {
+                        if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                            sqChkNum = 100;
+                        } else {
+                            threatToArray.push(Square[sqChkNum].piece.object);
+                            sqChkNum = 100;
+                        }
+
+                    } else if (piece.type === "pawn" && val % 10 === 0) {
+                        sqChkNum = 100;
+
+                    } else if (piece.type === "pawn" && val % 10 !== 0) {
+                        if (validSquare(sqChkNum)) {
+                            if (!(Square[sqChkNum].status.empty)) {
+                                threatToArray.push(Square[sqChkNum].piece.object);
+                                sqChkNum = 100;
+                            } else {
+                                sqChkNum = 100;
+                            }
+                        } else {
+                            sqChkNum = 100;
+                        }
+                    } else {
+                        if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                            sqChkNum += val;
+                        } else {
+                            threatToArray.push(Square[sqChkNum].piece.object);
+                            sqChkNum = 100;
+                        }
+                    }
+                }
+            });
+
+        } catch (e) {
+            $(".square").removeClass('highlighted');
+            $(".square").removeClass('capture');
+        }
+
+        return threatToArray;
+
+
+    };
+
+    // function to check if a king is in the threatnedarray of any piece.
+    var checkForCheck = function(blk, wht) {
+        if (turn === "white") {
+            for (var i = 0; i < blk.threatining.length; i++) {
+                if (blk.threatining[i].type === "king") {
+                    console.log("YOUR IN CHECK");
+                } else {
+                    console.log("not in check");
+                }
+            }
+        } else {
+            for (var i = 0; i < wht.threatining.length; i++) {
+                if (wht.threatining[i].type === "king") {
+                    console.log("YOUR IN CHECK");
+                } else {
+                    console.log("not in check");
+                }
+            }
+        }
+    };
+
+    // function create a threatning array for every piece and then check for check
+    var allPieceCheck = function() {
+        for (var i = 0; i < 16; i++) {
+            var bpiece = blackPieces[i];
+            var wpiece = whitePieces[i];
+            bpiece.threatining = threatTo(bpiece);
+            wpiece.threatining = threatTo(wpiece);
+            checkForCheck(bpiece, wpiece);
+        };
+    };
+
 });

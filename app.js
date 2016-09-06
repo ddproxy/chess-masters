@@ -119,7 +119,8 @@ $(document).ready(function() {
             };
             for (var j = 1; j < 9; j++) {
                 var name = 'blkpawn-' + j;
-                name = new Piece(name, "black", "./images/pieces/blk-pawn.png", pawnMovesNegative, (70 + j), "pawn");            };
+                name = new Piece(name, "black", "./images/pieces/blk-pawn.png", pawnMovesNegative, (70 + j), "pawn");
+            };
 
             // make rooks
         } else if (chessPiece === 'rook') {

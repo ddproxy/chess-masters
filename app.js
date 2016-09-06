@@ -14,6 +14,8 @@ $(document).ready(function() {
     var dragged;
     var oldEvent;
 
+    //create the turn banner
+    $('.turn-billboard').text(turn);
 
     // make the board
     for (var i = 0; i < 8; i++) {
@@ -288,8 +290,12 @@ $(document).ready(function() {
                 $(".square").removeClass('capture');
                 if (turn === 'white') {
                     turn = 'black';
+                    $('.turn-billboard').text(turn);
+                    $('.turn-billboard').css({'background-color': 'gray','color':'black', 'text-shadow': '3px -3px 10px white'});
                 } else {
                     turn = 'white';
+                    $('.turn-billboard').text(turn);
+                    $('.turn-billboard').css({'background-color': 'gray','color':'white', 'text-shadow': '3px -3px 10px black'});
                 }
             } else if (event.target == dragged) {
                 dragged.style.opacity = 1;
@@ -305,12 +311,18 @@ $(document).ready(function() {
                 $(".square").removeClass('capture');
                 if (turn === 'white') {
                     turn = 'black';
+                    $('.turn-billboard').text(turn);
+                    $('.turn-billboard').css({'background-color': 'gray','color':'black', 'text-shadow': '3px -3px 10px white'});
                 } else {
                     turn = 'white';
+                    $('.turn-billboard').text(turn);
+                    $('.turn-billboard').css({'background-color': 'gray','color':'white', 'text-shadow': '3px -3px 10px black'});
                 }
+
             }
         } else {
-            alert("Not your turn");
+            $('.turn-billboard').text("Not Your Turn");
+            $('.turn-billboard').css({'background-color': 'red','color':'black', 'text-shadow': '3px -3px 10px white'});
         }
     });
 });

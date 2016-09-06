@@ -1,9 +1,6 @@
 $(document).ready(function() {
-    var pawnMoves = [10];
-    var pawnMovesNegative = [-10];
-    var pawnCaptureMoves = [9, 11];
-    var pawnCaptureMovesNegative = [-9, -11];
-    var pawnFirstMoves = [20];
+    var pawnMoves = [10, 9, 11];
+    var pawnMovesNegative = [-10, -9, -11];
     var rookMoves = [1, -1, 10, -10];
     var knightMoves = [8, -8, 12, -12, 19, -19, 21, -21];
     var bishopMoves = [9, -9, 11, -11];
@@ -122,8 +119,7 @@ $(document).ready(function() {
             };
             for (var j = 1; j < 9; j++) {
                 var name = 'blkpawn-' + j;
-                name = new Piece(name, "black", "./images/pieces/blk-pawn.png", pawnMovesNegative, (70 + j), "pawn");
-            };
+                name = new Piece(name, "black", "./images/pieces/blk-pawn.png", pawnMovesNegative, (70 + j), "pawn");            };
 
             // make rooks
         } else if (chessPiece === 'rook') {
@@ -154,6 +150,7 @@ $(document).ready(function() {
         }
     };
 
+    //is a square empty or containing a different color
     function emptyOrDiffColor(chkNum, orig) {
         try {
             return !(Square[chkNum].piece.object.color === Square[orig].piece.object.color);
@@ -164,7 +161,7 @@ $(document).ready(function() {
 
 
 
-
+    //is a square a square on the board, empty or has an opponents color on it
     function validSquare(chkNum, orig) {
 
         // not a square on the board return false
@@ -179,15 +176,14 @@ $(document).ready(function() {
         }
     };
 
+    //to check who's turn it is
     function colorChecker(e) {
         try {
             var num = parseInt(e.target.getAttribute('id'));
             var color = Square[num].piece.object.color;
             return (color === turn);
 
-        } catch (e) {
-            console.log('empty');
-        }
+        } catch (e) {}
     };
 
 
@@ -201,11 +197,10 @@ $(document).ready(function() {
             $(".square").removeClass('highlighted');
             $(".square").removeClass('capture');
 
-
             piece.validIncrements.forEach(function(val, i) {
                 var sqChkNum = loc + val;
                 while (validSquare(sqChkNum, loc)) {
-                    if (piece.type === "pawn" || piece.type === "king" || piece.type === "knight") {
+                    if (piece.type === "king" || piece.type === "knight") {
                         if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
                             Square[sqChkNum].location.addClass("highlighted");
                             sqChkNum = 100;
@@ -214,6 +209,29 @@ $(document).ready(function() {
                             sqChkNum = 100;
                         }
 
+                    } else if (piece.type === "pawn" && val % 10 === 0) {
+                        if (piece.moveCounter < 1 && validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                            Square[sqChkNum].location.addClass("highlighted");
+                            Square[(sqChkNum + val)].location.addClass("highlighted");
+                            sqChkNum = 100;
+                        } else if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
+                            Square[sqChkNum].location.addClass("highlighted");
+                            sqChkNum = 100;
+                        } else {
+                            sqChkNum = 100;
+                        }
+
+                    } else if (piece.type === "pawn" && val % 10 !== 0) {
+                        if (validSquare(sqChkNum)) {
+                            if (!(Square[sqChkNum].status.empty)) {
+                                Square[sqChkNum].location.addClass("capture");
+                                sqChkNum = 100;
+                            } else {
+                                sqChkNum = 100;
+                            }
+                        } else {
+                            sqChkNum = 100;
+                        }
                     } else {
                         if (validSquare(sqChkNum) && Square[sqChkNum].status.empty) {
                             Square[sqChkNum].location.addClass("highlighted");
@@ -227,11 +245,14 @@ $(document).ready(function() {
             });
 
         } catch (e) {
+            throw 'That square is empty'
             $(".square").removeClass('highlighted');
             $(".square").removeClass('capture');
         }
     });
 
+
+    //dragging pieces
     $('.board').on('dragstart', function(event) {
         oldEvent = event;
         dragged = event.target;
@@ -248,6 +269,8 @@ $(document).ready(function() {
         event.preventDefault();
     });
 
+
+    //dropping the piece is the event that changes most of the game state
     $('.square').on('drop', function(event) {
         if (colorChecker(oldEvent)) {
             event.preventDefault();
@@ -270,7 +293,6 @@ $(document).ready(function() {
             } else if (event.target == dragged) {
                 dragged.style.opacity = 1;
             } else if (event.target.classList.contains('chess-piece')) {
-                console.log('this is a capture move');
                 dragged.parentNode.removeChild(dragged);
                 $(event.target).hide();
                 event.target.parentNode.appendChild(dragged);
@@ -290,40 +312,4 @@ $(document).ready(function() {
             alert("Not your turn");
         }
     });
-
-
-
-
-
-    // this is the closing tag
 });
-// (sqChkNum > 10 && sqChkNum < 89 && sqChkNum % 10 !== 0 && (sqChkNum + 1) % 10 !== 0) square number on the board
-
-// try {
-//   console.log(Square[(loc + val)]);
-//
-// } catch (e) {
-//   console.log("square" + (loc + val) + "doesn't exist");
-//
-// } finally {
-//
-// }
-
-
-
-
-
-
-
-
-
-// loop for the whole board
-// for (var i = 0; i < 8; i++) {
-//         something for the row
-//     for (var j = 0; j < 8; j++) {
-//         something for each square in the row
-//
-//         id++;
-//     };
-//     id = id - 18;
-// };

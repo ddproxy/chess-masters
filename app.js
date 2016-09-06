@@ -162,6 +162,8 @@ $(document).ready(function() {
         } else {
             var whtking = new Piece('whtking', "white", "./images/pieces/wht-king.png", kingMoves, 15, "king");
             var blkking = new Piece('blkking', "black", "./images/pieces/blk-king.png", kingMoves, 85, "king");
+            whtking.check = false;
+            blkking.check = false;
         }
     };
 
@@ -196,7 +198,9 @@ $(document).ready(function() {
             var color = Square[num].piece.object.color;
             return (color === turn);
 
-        } catch (e) {}
+        } catch (e) {
+            console.log("empty");
+        }
     };
 
 
@@ -207,54 +211,93 @@ $(document).ready(function() {
             var piece = Square[loc].piece.object;
             $(".square").removeClass('highlighted');
             $(".square").removeClass('capture');
+            if (colorChecker(event)) {
+                if (blkking.check || whtking.check) {
+                    if (piece.type === "king") {
 
-            piece.validIncrements.forEach(function(val, i) {
-                var sqChkNum = loc + val;
-                while (validSquare(sqChkNum, loc)) {
-                    if (piece.type === "king" || piece.type === "knight") {
-                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
-                            Square[sqChkNum].location.addClass("highlighted");
-                            sqChkNum = 100;
-                        } else {
-                            Square[sqChkNum].location.addClass("capture");
-                            sqChkNum = 100;
+                        if (turn === "white") {
+                            whtking.validIncrements.forEach(function(val, i) {
+                                var sqChkNum = loc + val;
+                                while (validSquare(sqChkNum, loc)) {
+                                    if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+                                        Square[sqChkNum].location.addClass("highlighted");
+                                        sqChkNum = 100;
+                                    } else {
+                                        Square[sqChkNum].location.addClass("capture");
+                                        sqChkNum = 100;
+                                    }
+                                }
+                            });
+                        } else if (turn === "black") {
+
+                            blkking.validIncrements.forEach(function(val, i) {
+
+                                var sqChkNum = loc + val;
+                                while (validSquare(sqChkNum, loc)) {
+                                    if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+                                        Square[sqChkNum].location.addClass("highlighted");
+                                        sqChkNum = 100;
+                                    } else {
+                                        Square[sqChkNum].location.addClass("capture");
+                                        sqChkNum = 100;
+                                    }
+                                }
+                            });
+
                         }
 
-                    } else if (piece.type === "pawn" && val % 10 === 0) {
-                        if (piece.moveCounter < 1 && validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
-                            Square[sqChkNum].location.addClass("highlighted");
-                            Square[(sqChkNum + val)].location.addClass("highlighted");
-                            sqChkNum = 100;
-                        } else if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
-                            Square[sqChkNum].location.addClass("highlighted");
-                            sqChkNum = 100;
-                        } else {
-                            sqChkNum = 100;
-                        }
-
-                    } else if (piece.type === "pawn" && val % 10 !== 0) {
-                        if (validSquare(sqChkNum, loc)) {
-                            if (!(Square[sqChkNum].status.empty)) {
-                                Square[sqChkNum].location.addClass("capture");
-                                sqChkNum = 100;
-                            } else {
-                                sqChkNum = 100;
-                            }
-                        } else {
-                            sqChkNum = 100;
-                        }
                     } else {
-                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
-                            Square[sqChkNum].location.addClass("highlighted");
-                            sqChkNum += val;
-                        } else {
-                            Square[sqChkNum].location.addClass("capture");
-                            sqChkNum = 100;
-                        }
+                      console.log("I'm not a king");
                     }
-                }
-            });
+                } else if (blkking.check === false && whtking.check === false) {
+                    piece.validIncrements.forEach(function(val, i) {
+                        var sqChkNum = loc + val;
+                        while (validSquare(sqChkNum, loc)) {
+                            if (piece.type === "king" || piece.type === "knight") {
+                                if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+                                    Square[sqChkNum].location.addClass("highlighted");
+                                    sqChkNum = 100;
+                                } else {
+                                    Square[sqChkNum].location.addClass("capture");
+                                    sqChkNum = 100;
+                                }
 
+                            } else if (piece.type === "pawn" && val % 10 === 0) {
+                                if (piece.moveCounter < 1 && validSquare(sqChkNum, loc) && validSquare((sqChkNum + (val)), loc) && Square[sqChkNum].status.empty) {
+                                    Square[sqChkNum].location.addClass("highlighted");
+                                    Square[(sqChkNum + (val))].location.addClass("highlighted");
+                                    sqChkNum = 100;
+                                } else if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+                                    Square[sqChkNum].location.addClass("highlighted");
+                                    sqChkNum = 100;
+                                } else {
+                                    sqChkNum = 100;
+                                }
+
+                            } else if (piece.type === "pawn" && val % 10 !== 0) {
+                                if (validSquare(sqChkNum, loc)) {
+                                    if (!(Square[sqChkNum].status.empty)) {
+                                        Square[sqChkNum].location.addClass("capture");
+                                        sqChkNum = 100;
+                                    } else {
+                                        sqChkNum = 100;
+                                    }
+                                } else {
+                                    sqChkNum = 100;
+                                }
+                            } else {
+                                if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+                                    Square[sqChkNum].location.addClass("highlighted");
+                                    sqChkNum += val;
+                                } else {
+                                    Square[sqChkNum].location.addClass("capture");
+                                    sqChkNum = 100;
+                                }
+                            }
+                        }
+                    });
+                }
+            }
         } catch (e) {
             $(".square").removeClass('highlighted');
             $(".square").removeClass('capture');
@@ -347,7 +390,8 @@ $(document).ready(function() {
 
             }
             allPieceCheck();
-            checkForCheck();
+            console.log("white king check status: " + whtking.check);
+            console.log("black king check status: " + blkking.check);
 
         } else {
             $('.turn-billboard').text("Not Your Turn");
@@ -414,21 +458,78 @@ $(document).ready(function() {
 
     };
 
+    // var threatenedSquares = function(piece) {
+    //     var threatToArray = [];
+    //     var loc = parseInt(piece.square.location[0].getAttribute('id'));
+    //
+    //     try {
+    //
+    //         piece.validIncrements.forEach(function(val, i) {
+    //             var sqChkNum = loc + val;
+    //             while (validSquare(sqChkNum, loc)) {
+    //                 if (piece.type === "king" || piece.type === "knight") {
+    //                     if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+    //                         sqChkNum = 100;
+    //                     } else {
+    //                         threatToArray.push(Square[sqChkNum].piece.object);
+    //                         sqChkNum = 100;
+    //                     }
+    //
+    //                 } else if (piece.type === "pawn" && val % 10 === 0) {
+    //                     sqChkNum = 100;
+    //
+    //                 } else if (piece.type === "pawn" && val % 10 !== 0) {
+    //                     if (validSquare(sqChkNum, loc)) {
+    //                         if (!(Square[sqChkNum].status.empty)) {
+    //                             threatToArray.push(Square[sqChkNum].piece.object);
+    //                             sqChkNum = 100;
+    //                         } else {
+    //                             sqChkNum = 100;
+    //                         }
+    //                     } else {
+    //                         sqChkNum = 100;
+    //                     }
+    //                 } else {
+    //                     if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+    //                         sqChkNum += val;
+    //                     } else {
+    //                         threatToArray.push(Square[sqChkNum].piece.object);
+    //                         sqChkNum = 100;
+    //                     }
+    //                 }
+    //             }
+    //         });
+    //
+    //     } catch (e) {
+    //         $(".square").removeClass('highlighted');
+    //         $(".square").removeClass('capture');
+    //     }
+    //
+    //     return threatToArray;
+    //
+    //
+    // };
+
     // function to check if a king is in the threatnedarray of any piece.
     var checkForCheck = function(blk, wht) {
         if (turn === "white") {
             for (var i = 0; i < blk.threatining.length; i++) {
                 if (blk.threatining[i].type === "king") {
-                    console.log("YOUR IN CHECK");
+                    whtking.check = true;
+                    alert("Your king is in check from " + blk.name);
+
                 } else {
+                    whtking.check = false;
                     console.log("not in check");
                 }
             }
         } else {
             for (var i = 0; i < wht.threatining.length; i++) {
                 if (wht.threatining[i].type === "king") {
-                    console.log("YOUR IN CHECK");
+                    blkking.check = true;
+                    alert("Your king is in check from " + wht.name)
                 } else {
+                    blkking.check = false;
                     console.log("not in check");
                 }
             }

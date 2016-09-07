@@ -22,6 +22,7 @@ $(document).ready(function() {
     var dragged;
     var oldEvent;
     var Square = {};
+    var gamePlays = [];
 
     // ***********************************VARIABLES***************************************
     // ***********************************VARIABLES***************************************
@@ -142,16 +143,14 @@ $(document).ready(function() {
         this.id = $('#' + id);
         this.img = svg;
         this.validIncrements = arr;
-        this.square = Square[start];
-        this.start = function() {
-            Square[start].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + start + '" />'));
-            Square[start].status[color] = true;
-            Square[start].status.empty = false;
-            Square[start].piece.object = this;
-            Square[start].piece.jQuery = this.id;
+        this.start = function(num) {
+            Square[num].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + num + '" />'));
+            Square[num].status[color] = true;
+            Square[num].status.empty = false;
+            Square[num].piece.object = this;
+            Square[num].piece.jQuery = this.id;
         };
         this.drop = function(num) {
-            this.square = Square[num];
             Square[num].status[color] = true;
             Square[num].status.empty = false;
             Square[num].piece.object = this;
@@ -160,7 +159,7 @@ $(document).ready(function() {
             this.coordinates = Square[num].coordinates;
 
         }
-        this.start();
+        this.start(start);
         this.moveCounter = 0;
         this.coordinates = Square[start].coordinates;
         this.threatining = [];
@@ -301,16 +300,8 @@ $(document).ready(function() {
     };
 
     //functions to check all squares that have validForOpponentArray arrays
-    var toEverySquare = function(callback) {
-        id = 81;
-        for (var i = 0; i < 8; i++) {
-            for (var j = 0; j < 8; j++) {
-                callback();
-            }
-            id++;
-        };
-        id = id - 18;
-    };
+
+
 
 
     //function that creates an array on every square that lets it know which pieces it is in the validForOpponentArray of
@@ -672,11 +663,25 @@ $(document).ready(function() {
                     });
                 }
 
-
             }
-            allPieceCheck();
-            checkForCheck();
-
+            id = 81;
+            var gameState =[];
+            for (var i = 0; i < 8; i++) {
+              for (var j = 0; j < 8; j++) {
+                var squareState = []
+                squareState.push(Square[id].location[0]);
+                try {
+                  squareState.push(Square[id].piece.object);
+                } catch (e) {
+                  console.log('empty')
+                }
+                gameState.push(squareState);
+                id++;
+              };
+              id = id - 18;
+            };
+            gamePlays.push(gameState);
+            console.log(gamePlays);
 
         } else {
             $('.turn-billboard').text("Not Your Turn");
@@ -689,9 +694,35 @@ $(document).ready(function() {
 
 
     });
+
+    $('body').on('dblclick', function(event) {
+      var square = 0;
+      var move = 3;
+      id = 81;
+      for (var i = 0; i < 8; i++) {
+        for (var j = 0; j < 8; j++) {
+          try {
+            Square[id].location[0].removeChild(Square[id].location[0].firstChild);
+            gamePlays[move][square][1].start(id);
+            id++;
+            square++
+
+          } catch (e) {
+
+            id++;
+            square++
+          };
+        };
+        id = id - 18;
+      };
+      while (gamePlays.length > move){
+        gamePlays.pop();
+      }
+    });
     // ************************************EVENT LISTENERS***************************************
     // ************************************EVENT LISTENERS***************************************
     // ************************************EVENT LISTENERS***************************************
+
 
 
 });

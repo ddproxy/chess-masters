@@ -89,6 +89,10 @@ $(document).ready(function() {
                 location: $('#' + id),
                 warpath: [],
                 validForArray: [],
+                protection: {
+                  protecting: [],
+                  protectedby: [],
+                },
                 status: {
                     empty: true,
                     black: false,
@@ -417,6 +421,13 @@ $(document).ready(function() {
         for (var i = 0; i < 16; i++) {
             var bpiece = blackPieces[i];
             var wpiece = whitePieces[i];
+            validFor(bpiece);
+            validFor(wpiece);
+            if (turn === "white") {
+                threatTo(wpiece);
+            } else {
+                threatTo(bpiece);
+            }
         };
     };
 
@@ -629,7 +640,11 @@ $(document).ready(function() {
             console.log("Square 76 is a valid square for the following");
             console.log(Square[76].validForArray);
             console.log("Square 76 has the following piece on it");
-            console.log(Square[76].piece.object.name);
+            try {
+              console.log(Square[76].piece.object.name);
+            } catch (e) {
+              console.log("this square is empty");
+            }
 
         } else {
             $('.turn-billboard').text("Not Your Turn");

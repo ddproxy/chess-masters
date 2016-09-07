@@ -675,18 +675,7 @@ $(document).ready(function() {
 
             }
             allPieceCheck();
-            console.log("Square 76 is a valid square for my following pieces");
-            console.log(Square[76].validForPlayerArray);
-            console.log("Square 76 is a valid square for my opponents following pieces");
-            console.log(Square[76].validForOpponentArray);
-            console.log("Square 76 is protectedby");
-            console.log(Square[76].protection.protectedby);
-            console.log(Square[76].protection.protectedby[0].name);
-            console.log("Square 76 is occupied by ");
-            console.log(Square[76].piece.object.name);
-            console.log("Square 76 is protecting");
-            console.log(Square[76].protection.protecting);
-            console.log(Square[76].protection.protecting[0].name)
+            checkForCheck();
 
 
         } else {

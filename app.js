@@ -111,8 +111,9 @@ $(document).ready(function() {
         this.start();
         this.moveCounter = 0;
         this.coordinates = Square[start].coordinates;
-        this.threatining = undefined;
-        this.threatenedBy = undefined;
+        this.threatining;
+        this.threatenedBy;
+        this.threatenedEmptySquares;
         if (this.color === "white") {
             whitePieces.push(this);
         } else {
@@ -198,9 +199,7 @@ $(document).ready(function() {
             var color = Square[num].piece.object.color;
             return (color === turn);
 
-        } catch (e) {
-            console.log("empty");
-        }
+        } catch (e) {}
     };
 
 
@@ -247,7 +246,7 @@ $(document).ready(function() {
                         }
 
                     } else {
-                      console.log("I'm not a king");
+                        console.log("I'm not a king");
                     }
                 } else if (blkking.check === false && whtking.check === false) {
                     piece.validIncrements.forEach(function(val, i) {
@@ -407,7 +406,10 @@ $(document).ready(function() {
 
     //function that creates a threatning array for a piece
     var threatTo = function(piece) {
+        var threats = [];
         var threatToArray = [];
+        var threatenedSquares = [];
+        var threatenedByArray = [];
         var loc = parseInt(piece.square.location[0].getAttribute('id'));
 
         try {
@@ -417,9 +419,11 @@ $(document).ready(function() {
                 while (validSquare(sqChkNum, loc)) {
                     if (piece.type === "king" || piece.type === "knight") {
                         if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+                            threatenedSquares.push(sqChkNum);
                             sqChkNum = 100;
                         } else {
                             threatToArray.push(Square[sqChkNum].piece.object);
+                            threatenedByArray.push(piece);
                             sqChkNum = 100;
                         }
 
@@ -430,8 +434,10 @@ $(document).ready(function() {
                         if (validSquare(sqChkNum, loc)) {
                             if (!(Square[sqChkNum].status.empty)) {
                                 threatToArray.push(Square[sqChkNum].piece.object);
+                                threatenedByArray.push(piece);
                                 sqChkNum = 100;
                             } else {
+                                threatenedSquares.push(sqChkNum);
                                 sqChkNum = 100;
                             }
                         } else {
@@ -439,112 +445,65 @@ $(document).ready(function() {
                         }
                     } else {
                         if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+                            threatenedSquares.push(sqChkNum);
                             sqChkNum += val;
                         } else {
                             threatToArray.push(Square[sqChkNum].piece.object);
+                            threatenedByArray.push(piece);
                             sqChkNum = 100;
                         }
                     }
                 }
             });
 
-        } catch (e) {
-            $(".square").removeClass('highlighted');
-            $(".square").removeClass('capture');
-        }
-
-        return threatToArray;
+        } catch (e) {}
+        threats.push(threatToArray);
+        threats.push(threatenedSquares);
+        threats.push(threatenedByArray)
+        return threats;
 
 
     };
 
-    // var threatenedSquares = function(piece) {
-    //     var threatToArray = [];
-    //     var loc = parseInt(piece.square.location[0].getAttribute('id'));
+    // // function to check if a king is in the threatnedarray of any piece.
+    // var checkForCheck = function(blk, wht) {
+    //     if (turn === "white") {
+    //         for (var i = 0; i < blk.threatining.length; i++) {
+    //             if (blk.threatining[i].type === "king") {
+    //                 whtking.check = true;
+    //                 alert("Your king is in check from " + blk.name);
     //
-    //     try {
-    //
-    //         piece.validIncrements.forEach(function(val, i) {
-    //             var sqChkNum = loc + val;
-    //             while (validSquare(sqChkNum, loc)) {
-    //                 if (piece.type === "king" || piece.type === "knight") {
-    //                     if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
-    //                         sqChkNum = 100;
-    //                     } else {
-    //                         threatToArray.push(Square[sqChkNum].piece.object);
-    //                         sqChkNum = 100;
-    //                     }
-    //
-    //                 } else if (piece.type === "pawn" && val % 10 === 0) {
-    //                     sqChkNum = 100;
-    //
-    //                 } else if (piece.type === "pawn" && val % 10 !== 0) {
-    //                     if (validSquare(sqChkNum, loc)) {
-    //                         if (!(Square[sqChkNum].status.empty)) {
-    //                             threatToArray.push(Square[sqChkNum].piece.object);
-    //                             sqChkNum = 100;
-    //                         } else {
-    //                             sqChkNum = 100;
-    //                         }
-    //                     } else {
-    //                         sqChkNum = 100;
-    //                     }
-    //                 } else {
-    //                     if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
-    //                         sqChkNum += val;
-    //                     } else {
-    //                         threatToArray.push(Square[sqChkNum].piece.object);
-    //                         sqChkNum = 100;
-    //                     }
-    //                 }
+    //             } else {
+    //                 whtking.check = false;
+    //                 console.log("not in check");
     //             }
-    //         });
-    //
-    //     } catch (e) {
-    //         $(".square").removeClass('highlighted');
-    //         $(".square").removeClass('capture');
+    //         }
+    //     } else {
+    //         for (var i = 0; i < wht.threatining.length; i++) {
+    //             if (wht.threatining[i].type === "king") {
+    //                 blkking.check = true;
+    //                 alert("Your king is in check from " + wht.name)
+    //             } else {
+    //                 blkking.check = false;
+    //                 console.log("not in check");
+    //             }
+    //         }
     //     }
-    //
-    //     return threatToArray;
-    //
-    //
     // };
-
-    // function to check if a king is in the threatnedarray of any piece.
-    var checkForCheck = function(blk, wht) {
-        if (turn === "white") {
-            for (var i = 0; i < blk.threatining.length; i++) {
-                if (blk.threatining[i].type === "king") {
-                    whtking.check = true;
-                    alert("Your king is in check from " + blk.name);
-
-                } else {
-                    whtking.check = false;
-                    console.log("not in check");
-                }
-            }
-        } else {
-            for (var i = 0; i < wht.threatining.length; i++) {
-                if (wht.threatining[i].type === "king") {
-                    blkking.check = true;
-                    alert("Your king is in check from " + wht.name)
-                } else {
-                    blkking.check = false;
-                    console.log("not in check");
-                }
-            }
-        }
-    };
 
     // function create a threatning array for every piece and then check for check
     var allPieceCheck = function() {
         for (var i = 0; i < 16; i++) {
             var bpiece = blackPieces[i];
             var wpiece = whitePieces[i];
-            bpiece.threatining = threatTo(bpiece);
-            wpiece.threatining = threatTo(wpiece);
-            checkForCheck(bpiece, wpiece);
+            console.log(threatTo(bpiece)[1], threatTo(wpiece)[1]);
+            bpiece.threatining = threatTo(bpiece)[0];
+            wpiece.threatining = threatTo(wpiece)[0];
+            bpiece.threatenedEmptySquares = threatTo(bpiece)[1];
+            wpiece.threatenedEmptySquares = threatTo(wpiece)[1];
+            bpiece.threatenedby = threatTo(bpiece)[2];
+            wpiece.threatenedby = threatTo(wpiece)[2];
+
         };
     };
-
 });

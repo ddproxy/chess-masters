@@ -1,4 +1,9 @@
 $(document).ready(function() {
+
+    // ***********************************VARIABLES***************************************
+    // ***********************************VARIABLES***************************************
+    // ***********************************VARIABLES***************************************
+
     var pawnMoves = [10, 9, 11];
     var pawnMovesNegative = [-10, -9, -11];
     var rookMoves = [1, -1, 10, -10];
@@ -17,6 +22,18 @@ $(document).ready(function() {
     var dragged;
     var oldEvent;
     var Square = {};
+
+    // ***********************************VARIABLES***************************************
+    // ***********************************VARIABLES***************************************
+    // ***********************************VARIABLES***************************************
+
+
+    // -----------------------------------------------------------------------------------------
+
+
+    // ******************************DOM ELEMENT CREATION***************************************
+    // ******************************DOM ELEMENT CREATION***************************************
+    // ******************************DOM ELEMENT CREATION***************************************
 
     //create the turn banner
     $('.turn-billboard').text(turn);
@@ -51,6 +68,17 @@ $(document).ready(function() {
         id = id - 18;
     };
 
+    // *****************************DOM ELEMENT CREATION***************************************
+    // *****************************DOM ELEMENT CREATION***************************************
+    // *****************************DOM ELEMENT CREATION***************************************
+
+
+    // -----------------------------------------------------------------------------------------
+
+
+    // *********************************SQUARE OBJECT***************************************
+    // *********************************SQUARE OBJECT***************************************
+    // *********************************SQUARE OBJECT***************************************
 
 
     // make square object
@@ -59,6 +87,7 @@ $(document).ready(function() {
         for (var j = 0; j < 8; j++) {
             Square[id] = {
                 location: $('#' + id),
+                warpath: [],
                 status: {
                     empty: true,
                     black: false,
@@ -75,12 +104,27 @@ $(document).ready(function() {
                     this.status.white = false;
                     this.piece.object = undefined;
                     this.piece.jQuery = undefined;
+                },
+                clearWarPath: function() {
+                    this.warpath = [];
                 }
             };
             id++;
         };
         id = id - 18;
     };
+
+    // *********************************SQUARE OBJECT***************************************
+    // *********************************SQUARE OBJECT***************************************
+    // *********************************SQUARE OBJECT***************************************
+
+
+    // -----------------------------------------------------------------------------------------
+
+
+    // *********************************PIECE CONSTRUCTOR***************************************
+    // *********************************PIECE CONSTRUCTOR***************************************
+    // *********************************PIECE CONSTRUCTOR***************************************
 
     // piece constructer
     var Piece = function(id, color, svg, arr, start, pieceType) {
@@ -111,15 +155,25 @@ $(document).ready(function() {
         this.start();
         this.moveCounter = 0;
         this.coordinates = Square[start].coordinates;
-        this.threatining;
-        this.threatenedBy;
-        this.threatenedEmptySquares;
+        this.threatining = [];
         if (this.color === "white") {
             whitePieces.push(this);
         } else {
             blackPieces.push(this);
         };
     };
+
+    // *********************************PIECE CONSTRUCTOR**************************************
+    // *********************************PIECE CONSTRUCTOR**************************************
+    // *********************************PIECE CONSTRUCTOR**************************************
+
+
+    // -----------------------------------------------------------------------------------------
+
+
+    // *********************************ADD PIECES***************************************
+    // *********************************ADD PIECES***************************************
+    // *********************************ADD PIECES***************************************
 
     // add pieces to the board loop maybe wrap this in a function later
     for (var i = 0; i < piecesArray.length; i++) {
@@ -168,6 +222,18 @@ $(document).ready(function() {
         }
     };
 
+    // ************************************ADD PIECES***************************************
+    // ************************************ADD PIECES***************************************
+    // ************************************ADD PIECES***************************************
+
+
+    // -----------------------------------------------------------------------------------------
+
+
+    // ************************************FUNCTION***************************************
+    // ************************************FUNCTION***************************************
+    // ************************************FUNCTION***************************************
+
     //is a square empty or containing a different color
     function emptyOrDiffColor(chkNum, orig) {
         try {
@@ -192,7 +258,7 @@ $(document).ready(function() {
         }
     };
 
-    //to check who's turn it is
+    //is the piece you are targeting the same color as the turn it is
     function colorChecker(e) {
         try {
             var num = parseInt(e.target.getAttribute('id'));
@@ -202,6 +268,111 @@ $(document).ready(function() {
         } catch (e) {}
     };
 
+    // function to clear the warpath array for every square
+    var resetAllWarPaths = function() {
+        id = 81;
+        for (var i = 0; i < 8; i++) {
+            for (var j = 0; j < 8; j++) {
+                Square[id].clearWarPath()
+                id++;
+            };
+            id = id - 18;
+        };
+    };
+
+    //functions to check all squares that have warpath arrays
+    var checkAllWarPaths = function() {
+        id = 81;
+        for (var i = 0; i < 8; i++) {
+            for (var j = 0; j < 8; j++) {
+              if (Square[id].warpath.length > 0){
+              console.log("Square " + id + " is in the warpath of: " + Square[id].warpath);
+            }
+              id++;
+            };
+            id = id - 18;
+        };
+    };
+
+    //function that creates an array on every square that lets it know which pieces it is in the warpath of
+    //and an array on each piece saying which piece it can take and which squares it can enter
+    var threatTo = function(piece) {
+        piece.threatining = [];
+
+        var loc = parseInt(piece.square.location[0].getAttribute('id'));
+
+        try {
+
+            piece.validIncrements.forEach(function(val, i) {
+                var sqChkNum = loc + val;
+                while (validSquare(sqChkNum, loc)) {
+                    if (piece.type === "king" || piece.type === "knight") {
+                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+                            Square[sqChkNum].warpath.push(piece);
+                            sqChkNum = 100;
+                        } else {
+                            piece.threatining.push(Square[sqChkNum].piece.object);
+                            Square[sqChkNum].warpath.push(piece);
+                            sqChkNum = 100;
+                        }
+
+                    } else if (piece.type === "pawn" && val % 10 === 0) {
+                        sqChkNum = 100;
+
+                    } else if (piece.type === "pawn" && val % 10 !== 0) {
+                        if (validSquare(sqChkNum, loc)) {
+                            if (!(Square[sqChkNum].status.empty)) {
+                                piece.threatining.push(Square[sqChkNum].piece.object);
+                                Square[sqChkNum].warpath.push(piece);
+                                sqChkNum = 100;
+                            } else {
+                                Square[sqChkNum].warpath.push(piece);
+                                sqChkNum = 100;
+                            }
+                        } else {
+                            sqChkNum = 100;
+                        }
+                    } else {
+                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
+                            Square[sqChkNum].warpath.push(piece);
+                            sqChkNum += val;
+                        } else {
+                            piece.threatining.push(Square[sqChkNum].piece.object);
+                            Square[sqChkNum].warpath.push(piece);
+                            sqChkNum = 100;
+                        }
+                    }
+                }
+
+            });
+
+        } catch (e) {}
+
+
+    };
+
+    // function to call threatTo() on every single piece
+    var allPieceCheck = function() {
+      resetAllWarPaths();
+        for (var i = 0; i < 16; i++) {
+            var bpiece = blackPieces[i];
+            var wpiece = whitePieces[i];
+            threatTo(bpiece);
+            threatTo(wpiece);
+        };
+    };
+
+    // ************************************FUNCTIONS***************************************
+    // ************************************FUNCTIONS***************************************
+    // ************************************FUNCTIONS***************************************
+
+
+    // -----------------------------------------------------------------------------------------
+
+
+    // ********************************EVENT LISTENERS***************************************
+    // ********************************EVENT LISTENERS***************************************
+    // ********************************EVENT LISTENERS***************************************
 
     // highlight valid moves
     $('.board').on('mouseenter', '.square', function(event) {
@@ -245,9 +416,7 @@ $(document).ready(function() {
 
                         }
 
-                    } else {
-                        console.log("I'm not a king");
-                    }
+                    } else {}
                 } else if (blkking.check === false && whtking.check === false) {
                     piece.validIncrements.forEach(function(val, i) {
                         var sqChkNum = loc + val;
@@ -389,9 +558,7 @@ $(document).ready(function() {
 
             }
             allPieceCheck();
-            console.log("white king check status: " + whtking.check);
-            console.log("black king check status: " + blkking.check);
-
+            console.log(Square[85]);
         } else {
             $('.turn-billboard').text("Not Your Turn");
             $('.turn-billboard').css({
@@ -403,107 +570,8 @@ $(document).ready(function() {
 
 
     });
+    // ************************************EVENT LISTENERS***************************************
+    // ************************************EVENT LISTENERS***************************************
+    // ************************************EVENT LISTENERS***************************************
 
-    //function that creates a threatning array for a piece
-    var threatTo = function(piece) {
-        var threats = [];
-        var threatToArray = [];
-        var threatenedSquares = [];
-        var threatenedByArray = [];
-        var loc = parseInt(piece.square.location[0].getAttribute('id'));
-
-        try {
-
-            piece.validIncrements.forEach(function(val, i) {
-                var sqChkNum = loc + val;
-                while (validSquare(sqChkNum, loc)) {
-                    if (piece.type === "king" || piece.type === "knight") {
-                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
-                            threatenedSquares.push(sqChkNum);
-                            sqChkNum = 100;
-                        } else {
-                            threatToArray.push(Square[sqChkNum].piece.object);
-                            threatenedByArray.push(piece);
-                            sqChkNum = 100;
-                        }
-
-                    } else if (piece.type === "pawn" && val % 10 === 0) {
-                        sqChkNum = 100;
-
-                    } else if (piece.type === "pawn" && val % 10 !== 0) {
-                        if (validSquare(sqChkNum, loc)) {
-                            if (!(Square[sqChkNum].status.empty)) {
-                                threatToArray.push(Square[sqChkNum].piece.object);
-                                threatenedByArray.push(piece);
-                                sqChkNum = 100;
-                            } else {
-                                threatenedSquares.push(sqChkNum);
-                                sqChkNum = 100;
-                            }
-                        } else {
-                            sqChkNum = 100;
-                        }
-                    } else {
-                        if (validSquare(sqChkNum, loc) && Square[sqChkNum].status.empty) {
-                            threatenedSquares.push(sqChkNum);
-                            sqChkNum += val;
-                        } else {
-                            threatToArray.push(Square[sqChkNum].piece.object);
-                            threatenedByArray.push(piece);
-                            sqChkNum = 100;
-                        }
-                    }
-                }
-            });
-
-        } catch (e) {}
-        threats.push(threatToArray);
-        threats.push(threatenedSquares);
-        threats.push(threatenedByArray)
-        return threats;
-
-
-    };
-
-    // // function to check if a king is in the threatnedarray of any piece.
-    // var checkForCheck = function(blk, wht) {
-    //     if (turn === "white") {
-    //         for (var i = 0; i < blk.threatining.length; i++) {
-    //             if (blk.threatining[i].type === "king") {
-    //                 whtking.check = true;
-    //                 alert("Your king is in check from " + blk.name);
-    //
-    //             } else {
-    //                 whtking.check = false;
-    //                 console.log("not in check");
-    //             }
-    //         }
-    //     } else {
-    //         for (var i = 0; i < wht.threatining.length; i++) {
-    //             if (wht.threatining[i].type === "king") {
-    //                 blkking.check = true;
-    //                 alert("Your king is in check from " + wht.name)
-    //             } else {
-    //                 blkking.check = false;
-    //                 console.log("not in check");
-    //             }
-    //         }
-    //     }
-    // };
-
-    // function create a threatning array for every piece and then check for check
-    var allPieceCheck = function() {
-        for (var i = 0; i < 16; i++) {
-            var bpiece = blackPieces[i];
-            var wpiece = whitePieces[i];
-            console.log(threatTo(bpiece)[2], threatTo(wpiece)[2]);
-            bpiece.threatining = threatTo(bpiece)[0];
-            wpiece.threatining = threatTo(wpiece)[0];
-            bpiece.threatenedEmptySquares = threatTo(bpiece)[1];
-            wpiece.threatenedEmptySquares = threatTo(wpiece)[1];
-            bpiece.threatenedby = threatTo(bpiece)[2];
-            wpiece.threatenedby = threatTo(wpiece)[2];
-
-        };
-    };
 });

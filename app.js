@@ -496,7 +496,7 @@ $(document).ready(function() {
         for (var i = 0; i < 16; i++) {
             var bpiece = blackPieces[i];
             var wpiece = whitePieces[i];
-            console.log(threatTo(bpiece)[1], threatTo(wpiece)[1]);
+            console.log(threatTo(bpiece)[2], threatTo(wpiece)[2]);
             bpiece.threatining = threatTo(bpiece)[0];
             wpiece.threatining = threatTo(wpiece)[0];
             bpiece.threatenedEmptySquares = threatTo(bpiece)[1];

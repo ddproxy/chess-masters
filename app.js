@@ -110,13 +110,24 @@ $(document).ready(function() {
                     this.status.white = false;
                     this.piece.object = undefined;
                     this.piece.jQuery = undefined;
+                    this.location.empty();
                 },
                 clear: function() {
                     this.validForOpponentArray = [];
                     this.validForPlayerArray = [];
                     this.protection.protectedby = [];
                     this.protection.protecting = [];
-                }
+                },
+                hasKing: function() {
+                    if (this.status.empty === false) {
+                        if (this.piece.object.type === 'king') {
+                            return this.piece.object.color;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                },
             };
             id++;
         };
@@ -137,6 +148,7 @@ $(document).ready(function() {
 
     // piece constructer
     var Piece = function(id, color, svg, arr, start, pieceType) {
+        this.sqNumber = start;
         this.name = id;
         this.type = pieceType;
         this.color = color;
@@ -157,8 +169,20 @@ $(document).ready(function() {
             Square[num].piece.jQuery = this.id;
             this.moveCounter++;
             this.coordinates = Square[num].coordinates;
+            this.sqNumber = num;
 
-        }
+        };
+
+        this.unDrop = function(num) {
+            Square[num].status[color] = true;
+            Square[num].status.empty = false;
+            Square[num].piece.object = this;
+            Square[num].piece.jQuery = this.id;
+            this.moveCounter--;
+            this.coordinates = Square[num].coordinates;
+            this.sqNumber = num;
+
+        };
         this.start(start);
         this.moveCounter = 0;
         this.coordinates = Square[start].coordinates;
@@ -309,7 +333,7 @@ $(document).ready(function() {
     var validForOpponent = function(piece) {
         piece.threatining = [];
 
-        var loc = parseInt(piece.square.location[0].getAttribute('id'));
+        var loc = piece.sqNumber;
 
         try {
 
@@ -376,7 +400,7 @@ $(document).ready(function() {
 
     // function that gives a square an array of pieces that can be in it
     var validFor = function(piece) {
-        var loc = parseInt(piece.square.location[0].getAttribute('id'));
+        var loc = piece.sqNumber;
 
         try {
 
@@ -463,10 +487,20 @@ $(document).ready(function() {
     };
 
     var checkForCheck = function() {
-        if (blkking.square.validForOpponentArray.length > 0) {
-            blkking.check = true;
-        } else if (whtking.square.validForOpponentArray.length > 0) {
-            whtking.check = true;
+        for (var id in Square) {
+            if (Square[id].hasKing() === turn && Square[id].validForOpponentArray.length > 0) {
+                if (turn === "white") {
+                    whtking.check === true;
+                    alert("CHECK!");
+                } else {
+                    blkking.check === true;
+                    alert("CHECK!");
+                }
+            } else if (Square[id].hasKing() === "white" || Square[id].hasKing() === "black") {
+                if (Square[id].validForPlayerArray.length > 0) {
+                  throw "You've put yourself in check"
+                }
+            }
         }
     };
 
@@ -583,6 +617,7 @@ $(document).ready(function() {
     //dragging pieces
     $('.board').on('dragstart', '.chess-piece', function(event) {
         oldEvent = event;
+        oldSquare = event.target.parentNode;
         dragged = event.target;
         if (colorChecker(event)) {
             dragged.style.opacity = .5;
@@ -603,12 +638,13 @@ $(document).ready(function() {
 
     //dropping the piece is the event that changes most of the game state
     $('.board').on('drop', function(event) {
-        if (colorChecker(oldEvent)) {
-            event.preventDefault();
-            var oldLoc = parseInt(dragged.getAttribute('id'));
-            var newLoc = parseInt(event.target.getAttribute('id'));
-            if (event.target.classList.contains('highlighted')) {
+      event.preventDefault();
+      var oldLoc = parseInt(dragged.getAttribute('id'));
+      var newLoc = parseInt(event.target.getAttribute('id'));
 
+      try {
+        if (colorChecker(oldEvent)) {
+            if (event.target.classList.contains('highlighted')) {
                 dragged.parentNode.removeChild(dragged);
                 event.target.appendChild(dragged);
                 dragged.setAttribute('id', newLoc)
@@ -664,24 +700,8 @@ $(document).ready(function() {
                 }
 
             }
-            id = 81;
-            var gameState =[];
-            for (var i = 0; i < 8; i++) {
-              for (var j = 0; j < 8; j++) {
-                var squareState = []
-                squareState.push(Square[id].location[0]);
-                try {
-                  squareState.push(Square[id].piece.object);
-                } catch (e) {
-                  console.log('empty')
-                }
-                gameState.push(squareState);
-                id++;
-              };
-              id = id - 18;
-            };
-            gamePlays.push(gameState);
-            console.log(gamePlays);
+            allPieceCheck();
+            checkForCheck();
 
         } else {
             $('.turn-billboard').text("Not Your Turn");
@@ -691,33 +711,39 @@ $(document).ready(function() {
                 'text-shadow': '3px -3px 10px white'
             });
         }
+} catch (e) {
+  alert(e);
+  console.log(dragged);
+  console.log(event.target);
+  console.log(oldSquare);
+  event.target.removeChild(dragged);
+  oldSquare.appendChild(dragged);
+  dragged.setAttribute('id', oldLoc);
+  Square[newLoc].piece.object.unDrop(oldLoc);
+  Square[newLoc].setToEmpty();
+  $(".square").removeClass('highlighted');
+  $(".square").removeClass('capture');
+  if (turn === 'white') {
+      turn = 'black';
+      $('.turn-billboard').text(turn);
+      $('.turn-billboard').css({
+          'background-color': 'gray',
+          'color': 'black',
+          'text-shadow': '3px -3px 10px white'
+      });
+  } else {
+      turn = 'white';
+      $('.turn-billboard').text(turn);
+      $('.turn-billboard').css({
+          'background-color': 'gray',
+          'color': 'white',
+          'text-shadow': '3px -3px 10px black'
+      });
+  }
 
 
-    });
+}
 
-    $('body').on('dblclick', function(event) {
-      var square = 0;
-      var move = 3;
-      id = 81;
-      for (var i = 0; i < 8; i++) {
-        for (var j = 0; j < 8; j++) {
-          try {
-            Square[id].location[0].removeChild(Square[id].location[0].firstChild);
-            gamePlays[move][square][1].start(id);
-            id++;
-            square++
-
-          } catch (e) {
-
-            id++;
-            square++
-          };
-        };
-        id = id - 18;
-      };
-      while (gamePlays.length > move){
-        gamePlays.pop();
-      }
     });
     // ************************************EVENT LISTENERS***************************************
     // ************************************EVENT LISTENERS***************************************

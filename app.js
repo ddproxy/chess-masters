@@ -134,6 +134,49 @@ $(document).ready(function() {
         id = id - 18;
     };
 
+    Square[101] = {
+        location: $('#' + id),
+        validForOpponentArray: [],
+        validForPlayerArray: [],
+        protection: {
+            protecting: [],
+            protectedby: [],
+        },
+        status: {
+            empty: true,
+            black: false,
+            white: false,
+        },
+        piece: {
+            object: undefined,
+            jQuery: undefined,
+        },
+        coordinates: '' + String.fromCharCode((0 - i) + 104) + (j + 1) + '',
+        setToEmpty: function() {
+            this.status.empty = true;
+            this.status.black = false;
+            this.status.white = false;
+            this.piece.object = undefined;
+            this.piece.jQuery = undefined;
+            this.location.empty();
+        },
+        clear: function() {
+            this.validForOpponentArray = [];
+            this.validForPlayerArray = [];
+            this.protection.protectedby = [];
+            this.protection.protecting = [];
+        },
+        hasKing: function() {
+            if (this.status.empty === false) {
+                if (this.piece.object.type === 'king') {
+                    return this.piece.object.color;
+                } else {
+                    return false;
+                }
+            }
+        },
+      };
+
     // *********************************SQUARE OBJECT***************************************
     // *********************************SQUARE OBJECT***************************************
     // *********************************SQUARE OBJECT***************************************
@@ -157,13 +200,19 @@ $(document).ready(function() {
         this.validIncrements = arr;
         this.start = function(num) {
             Square[num].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + num + '" />'));
-            Square[num].status[color] = true;
             Square[num].status.empty = false;
             Square[num].piece.object = this;
             Square[num].piece.jQuery = this.id;
         };
+        this.move = function(old, newShit) {
+            Square[old].location.empty();
+            Square[newShit].piece.object = this;
+            Square[newShit].piece.jQuery = this.id;
+            Square[newShit].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + newShit + '" />'));
+            Square[newShit].status.empty = false;
+        };
+
         this.drop = function(num) {
-            Square[num].status[color] = true;
             Square[num].status.empty = false;
             Square[num].piece.object = this;
             Square[num].piece.jQuery = this.id;
@@ -174,7 +223,6 @@ $(document).ready(function() {
         };
 
         this.unDrop = function(num) {
-            Square[num].status[color] = true;
             Square[num].status.empty = false;
             Square[num].piece.object = this;
             Square[num].piece.jQuery = this.id;
@@ -183,6 +231,10 @@ $(document).ready(function() {
             this.sqNumber = num;
 
         };
+
+        this.oldPiece = function (num, img) {
+          Square[num].location.append($('<img class="chess-piece" draggable="true" src="' + img + '" id="' + newShit + '" />'));
+        }
         this.start(start);
         this.moveCounter = 0;
         this.coordinates = Square[start].coordinates;
@@ -498,7 +550,7 @@ $(document).ready(function() {
                 }
             } else if (Square[id].hasKing() === "white" || Square[id].hasKing() === "black") {
                 if (Square[id].validForPlayerArray.length > 0) {
-                  throw "You've put yourself in check"
+                    throw "You've put yourself in check"
                 }
             }
         }
@@ -638,117 +690,139 @@ $(document).ready(function() {
 
     //dropping the piece is the event that changes most of the game state
     $('.board').on('drop', function(event) {
-      event.preventDefault();
-      var oldLoc = parseInt(dragged.getAttribute('id'));
-      var newLoc = parseInt(event.target.getAttribute('id'));
+        event.preventDefault();
+        var oldLoc = parseInt(dragged.getAttribute('id'));
+        var newLoc = parseInt(event.target.getAttribute('id'));
 
-      try {
-        if (colorChecker(oldEvent)) {
-            if (event.target.classList.contains('highlighted')) {
-                dragged.parentNode.removeChild(dragged);
-                event.target.appendChild(dragged);
-                dragged.setAttribute('id', newLoc)
-                Square[oldLoc].piece.object.drop(newLoc);
-                Square[oldLoc].setToEmpty();
-                $(".square").removeClass('highlighted');
-                $(".square").removeClass('capture');
-                if (turn === 'white') {
-                    turn = 'black';
-                    $('.turn-billboard').text(turn);
-                    $('.turn-billboard').css({
-                        'background-color': 'gray',
-                        'color': 'black',
-                        'text-shadow': '3px -3px 10px white'
-                    });
-                } else {
-                    turn = 'white';
-                    $('.turn-billboard').text(turn);
-                    $('.turn-billboard').css({
-                        'background-color': 'gray',
-                        'color': 'white',
-                        'text-shadow': '3px -3px 10px black'
-                    });
-                }
-            } else if (event.target == dragged) {
-                dragged.style.opacity = 1;
-            } else if (event.target.classList.contains('chess-piece') && event.target.parentNode.classList.contains('capture')) {
-                dragged.parentNode.removeChild(dragged);
-                $(event.target).hide();
-                event.target.parentNode.appendChild(dragged);
-                $(event.target).remove();
-                dragged.setAttribute('id', newLoc);
-                Square[oldLoc].piece.object.drop(newLoc);
-                Square[oldLoc].setToEmpty();
-                $(".square").removeClass('highlighted');
-                $(".square").removeClass('capture');
-                if (turn === 'white') {
-                    turn = 'black';
-                    $('.turn-billboard').text(turn);
-                    $('.turn-billboard').css({
-                        'background-color': 'gray',
-                        'color': 'black',
-                        'text-shadow': '3px -3px 10px white'
-                    });
-                } else {
-                    turn = 'white';
-                    $('.turn-billboard').text(turn);
-                    $('.turn-billboard').css({
-                        'background-color': 'gray',
-                        'color': 'white',
-                        'text-shadow': '3px -3px 10px black'
-                    });
+        try {
+            if (colorChecker(oldEvent)) {
+                if (event.target.classList.contains('highlighted')) {
+                    dragged.parentNode.removeChild(dragged);
+                    event.target.appendChild(dragged);
+                    dragged.setAttribute('id', newLoc)
+                    Square[oldLoc].piece.object.drop(newLoc);
+                    Square[oldLoc].setToEmpty();
+                    $(".square").removeClass('highlighted');
+                    $(".square").removeClass('capture');
+                    if (turn === 'white') {
+                        turn = 'black';
+                        $('.turn-billboard').text(turn);
+                        $('.turn-billboard').css({
+                            'background-color': 'gray',
+                            'color': 'black',
+                            'text-shadow': '3px -3px 10px white'
+                        });
+                    } else {
+                        turn = 'white';
+                        $('.turn-billboard').text(turn);
+                        $('.turn-billboard').css({
+                            'background-color': 'gray',
+                            'color': 'white',
+                            'text-shadow': '3px -3px 10px black'
+                        });
+                    }
+                } else if (event.target == dragged) {
+                    dragged.style.opacity = 1;
+                } else if (event.target.classList.contains('chess-piece') && event.target.parentNode.classList.contains('capture')) {
+
+                    dragged.parentNode.removeChild(dragged);
+                    $(event.target).hide();
+                    let $piece = $(event.target);
+                    event.target.parentNode.appendChild(dragged);
+                    dragged.setAttribute('id', newLoc);
+                    Square[newLoc].piece.object.drop(101);
+                    Square[oldLoc].piece.object.drop(newLoc);
+                    Square[oldLoc].setToEmpty();
+                    $(".square").removeClass('highlighted');
+                    $(".square").removeClass('capture');
+                    if (turn === 'white') {
+                        turn = 'black';
+                        $('.turn-billboard').text(turn);
+                        $('.turn-billboard').css({
+                            'background-color': 'gray',
+                            'color': 'black',
+                            'text-shadow': '3px -3px 10px white'
+                        });
+                    } else {
+                        turn = 'white';
+                        $('.turn-billboard').text(turn);
+                        $('.turn-billboard').css({
+                            'background-color': 'gray',
+                            'color': 'white',
+                            'text-shadow': '3px -3px 10px black'
+                        });
+                    }
+
                 }
 
+                allPieceCheck();
+                checkForCheck();
+
+            } else {
+                $('.turn-billboard').text("Not Your Turn");
+                $('.turn-billboard').css({
+                    'background-color': 'red',
+                    'color': 'black',
+                    'text-shadow': '3px -3px 10px white'
+                });
             }
-            allPieceCheck();
-            checkForCheck();
+        } catch (e) {
+            alert(e);
+            if (event.target.classList.contains('chess-piece')) {
+              Square[newLoc].piece.object.move(newLoc, oldLoc);
+              Square[101].piece.object.move(101, newLoc);
+              $(".square").removeClass('highlighted');
+              $(".square").removeClass('capture');
+              if (turn === 'white') {
+                  turn = 'black';
+                  $('.turn-billboard').text(turn);
+                  $('.turn-billboard').css({
+                      'background-color': 'gray',
+                      'color': 'black',
+                      'text-shadow': '3px -3px 10px white'
+                  });
+              } else {
+                  turn = 'white';
+                  $('.turn-billboard').text(turn);
+                  $('.turn-billboard').css({
+                      'background-color': 'gray',
+                      'color': 'white',
+                      'text-shadow': '3px -3px 10px black'
+                  });
+              }
+            } else {
+                event.target.removeChild(dragged);
+                oldSquare.appendChild(dragged);
+                dragged.setAttribute('id', oldLoc);
+                Square[101].piece.object.drop(newLoc);
+                $(".square").removeClass('highlighted');
+                $(".square").removeClass('capture');
+                if (turn === 'white') {
+                    turn = 'black';
+                    $('.turn-billboard').text(turn);
+                    $('.turn-billboard').css({
+                        'background-color': 'gray',
+                        'color': 'black',
+                        'text-shadow': '3px -3px 10px white'
+                    });
+                } else {
+                    turn = 'white';
+                    $('.turn-billboard').text(turn);
+                    $('.turn-billboard').css({
+                        'background-color': 'gray',
+                        'color': 'white',
+                        'text-shadow': '3px -3px 10px black'
+                    });
+                }
+            }
 
-        } else {
-            $('.turn-billboard').text("Not Your Turn");
-            $('.turn-billboard').css({
-                'background-color': 'red',
-                'color': 'black',
-                'text-shadow': '3px -3px 10px white'
-            });
+
+            // ************************************EVENT LISTENERS***************************************
+            // ************************************EVENT LISTENERS***************************************
+            // ************************************EVENT LISTENERS***************************************
+
         }
-} catch (e) {
-  alert(e);
-  console.log(dragged);
-  console.log(event.target);
-  console.log(oldSquare);
-  event.target.removeChild(dragged);
-  oldSquare.appendChild(dragged);
-  dragged.setAttribute('id', oldLoc);
-  Square[newLoc].piece.object.unDrop(oldLoc);
-  Square[newLoc].setToEmpty();
-  $(".square").removeClass('highlighted');
-  $(".square").removeClass('capture');
-  if (turn === 'white') {
-      turn = 'black';
-      $('.turn-billboard').text(turn);
-      $('.turn-billboard').css({
-          'background-color': 'gray',
-          'color': 'black',
-          'text-shadow': '3px -3px 10px white'
-      });
-  } else {
-      turn = 'white';
-      $('.turn-billboard').text(turn);
-      $('.turn-billboard').css({
-          'background-color': 'gray',
-          'color': 'white',
-          'text-shadow': '3px -3px 10px black'
-      });
-  }
-
-
-}
 
     });
-    // ************************************EVENT LISTENERS***************************************
-    // ************************************EVENT LISTENERS***************************************
-    // ************************************EVENT LISTENERS***************************************
-
-
 
 });

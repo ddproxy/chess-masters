@@ -73,3 +73,11 @@ p {
   border-radius: 50%
 
 }
+
+.dead-pieces {
+  float: right;
+  z-index: -1;
+  color: white;
+  width: 10%;  
+  position: relative;
+}

@@ -58,6 +58,10 @@ p {
   border: 5px solid red;
   transition: border 80ms;
 }
+.protected{
+  border: 5px solid green;
+  transition: border 80ms;
+}
 
 .turn-billboard {
   position: relative;

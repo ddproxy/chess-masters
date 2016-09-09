@@ -13,7 +13,7 @@ $(document).ready(function() {
     var squareCounter = 81;
     var piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
     var turn = "white";
-    var computerColor = "black";
+    var computerPlay = false;
     var odd = true;
     var dragged;
     var oldEvent;
@@ -288,10 +288,16 @@ $(document).ready(function() {
                         sqChkNum = 100;
                     } else if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
                         Square[sqChkNum].validForOpponentArray.push(piece);
+                        if (emptyOrDiffColor(sqChkNum, loc)) {
+                            piece.validSquares.push(sqChkNum);
+                        }
                         sqChkNum = 100;
                     } else {
                         piece.threatining.push(Square[sqChkNum].piece.object);
                         Square[sqChkNum].validForOpponentArray.push(piece);
+                        if (emptyOrDiffColor(sqChkNum, loc)) {
+                            piece.validSquares.push(sqChkNum);
+                        }
                         sqChkNum = 100;
                     }
 
@@ -352,20 +358,33 @@ $(document).ready(function() {
                         sqChkNum = 100;
                     } else
                     if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
-                        Square[sqChkNum].validForPlayerArray.push(piece)
+                        Square[sqChkNum].validForPlayerArray.push(piece);
+                        if (emptyOrDiffColor(sqChkNum, loc)) {
+                            piece.validSquares.push(sqChkNum);
+                        }
                         sqChkNum = 100;
                     } else {
                         Square[sqChkNum].validForPlayerArray.push(piece)
+                        if (emptyOrDiffColor(sqChkNum, loc)) {
+                            piece.validSquares.push(sqChkNum);
+                        }
                         sqChkNum = 100;
                     }
 
                 } else if (piece.type === "pawn" && val % 10 === 0) {
                     if (piece.moveCounter < 1 && validSquareOnBoard(sqChkNum) && validSquare((sqChkNum + (val)), loc) && Square[sqChkNum].status.empty) {
-                        Square[sqChkNum].validForPlayerArray.push(piece)
-                        Square[(sqChkNum + (val))].validForPlayerArray.push(piece)
+                        if (emptyOrDiffColor(sqChkNum, loc)) {
+                            piece.validSquares.push(sqChkNum);
+                        }
+
+                        Square[sqChkNum].validForPlayerArray.push(piece);
+                        Square[(sqChkNum + (val))].validForPlayerArray.push(piece);
                         sqChkNum = 100;
                     } else if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
-                        Square[sqChkNum].validForPlayerArray.push(piece)
+                        Square[sqChkNum].validForPlayerArray.push(piece);
+                        if (emptyOrDiffColor(sqChkNum, loc)) {
+                            piece.validSquares.push(sqChkNum);
+                        }
                         sqChkNum = 100;
                     } else {
                         sqChkNum = 100;
@@ -380,7 +399,10 @@ $(document).ready(function() {
                     if (validSquareOnBoard(sqChkNum)) {
                         if (!(Square[sqChkNum].status.empty)) {
 
-                            Square[sqChkNum].validForPlayerArray.push(piece)
+                            Square[sqChkNum].validForPlayerArray.push(piece);
+                            if (emptyOrDiffColor(sqChkNum, loc)) {
+                                piece.validSquares.push(sqChkNum);
+                            }
                             sqChkNum = 100;
                         } else {
                             sqChkNum = 100;
@@ -395,10 +417,16 @@ $(document).ready(function() {
                         sqChkNum = 100;
                     } else
                     if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
-                        Square[sqChkNum].validForPlayerArray.push(piece)
+                        Square[sqChkNum].validForPlayerArray.push(piece);
+                        if (emptyOrDiffColor(sqChkNum, loc)) {
+                            piece.validSquares.push(sqChkNum);
+                        }
                         sqChkNum += val;
                     } else {
-                        Square[sqChkNum].validForPlayerArray.push(piece)
+                        Square[sqChkNum].validForPlayerArray.push(piece);
+                        if (emptyOrDiffColor(sqChkNum, loc)) {
+                            piece.validSquares.push(sqChkNum);
+                        }
                         sqChkNum = 100;
                     }
                 }
@@ -443,11 +471,14 @@ $(document).ready(function() {
             if (turn === "white") {
                 validFor(wpiece);
                 validForOpponent(bpiece);
+
             } else if (turn === 'black') {
                 validFor(bpiece);
                 validForOpponent(wpiece);
+
             }
-        };
+
+        }
     };
 
     var checkForCheck = function(callback) {
@@ -470,14 +501,66 @@ $(document).ready(function() {
     };
 
     function checkmate() {
-        if (errorCount > 5){
-          var x = confirm("I think you are in Checkmate, click cancel to continue");
-          if (x === true){
-            location.reload();
-          }
+        if (errorCount > 5) {
+            var x = confirm("I think you are in Checkmate, click cancel to continue");
+            if (x === true) {
+                location.reload();
+            }
         }
-      }
+    }
 
+    function BlackMoves() {
+        var movable = [];
+        for (var i = 0; i < 16; i++) {
+            var bpiece = blackPieces[i];
+            if (bpiece.validSquares.length > 0) {
+                movable.push(bpiece);
+            }
+        }
+        var piecePicker = Math.floor(Math.random() * (movable.length));
+        console.log(piecePicker);
+        var selectPiece = movable[piecePicker];
+        console.log(selectPiece);
+        var SquarePicker = Math.floor(Math.random() * (selectPiece.validSquares.length));
+        console.log(SquarePicker);
+        var selectSquare = selectPiece.validSquares[SquarePicker];
+        console.log(selectSquare);
+        setTimeout(function() {
+            try {
+              errorCount = 0;
+                if (selectPiece.threatining.length > 0) {
+                    selectPiece.place(selectPiece.threatining[0].sqNumber, selectPiece.sqNumber);
+                    allPieceCheck();
+                    checkForCheck();
+                } else if (emptyOrDiffColor(selectSquare, selectPiece.sqNumber)) {
+                    if (Square[selectSquare].status.empty === false) {
+                        Square[selectSquare].piece.history.push(Square[selectSquare].piece.object);
+                        Square[selectSquare].piece.object.previousSquares.push(selectSquare);
+                        Square[selectSquare].setToEmpty();
+                        selectPiece.place(selectSquare, selectPiece.sqNumber);
+                        allPieceCheck();
+                        checkForCheck();
+                    } else {
+                        selectPiece.place(selectSquare, selectPiece.sqNumber);
+                        allPieceCheck();
+                        checkForCheck();
+                    }
+                } else {
+                  throw "computer made a bad move its trying again"
+                }
+            } catch (e) {
+                alert(e);
+                errorCount++
+                console.log(errorCount);
+                if (event.target.classList.contains('chess-piece')) {
+                    rewindCapture(oldLoc, newLoc);
+                } else {
+                    rewind(oldLoc, newLoc);
+                }
+
+            }
+        }, 1000)
+    }
 
 
 
@@ -488,6 +571,7 @@ $(document).ready(function() {
         $(".square").removeClass('highlighted');
         $(".square").removeClass('capture');
         $(".square").removeClass('protected');
+
         if (Square[loc].status.empty === false && colorChecker(event)) {
             piece.validIncrements.forEach(function(val, i) {
                 var sqChkNum = loc + val;
@@ -578,6 +662,7 @@ $(document).ready(function() {
         var oldLoc = parseInt(dragged.getAttribute('id'));
         var newLoc = parseInt(event.target.getAttribute('id'));
         try {
+          errorCount = 0;
             if (colorChecker(oldEvent)) {
                 if (event.target.classList.contains('highlighted')) {
                     Square[oldLoc].piece.object.place(newLoc, oldLoc);
@@ -599,10 +684,10 @@ $(document).ready(function() {
             }
             allPieceCheck();
             checkForCheck();
-            console.log('these are the pieces that can take whtking');
-            console.log(Square[15].validForOpponentArray);
-            console.log('these are the pieces that can take blkking');
-            console.log(Square[85].validForOpponentArray);
+            if (computerPlay === true){
+            BlackMoves();
+          }
+
         } catch (e) {
             alert(e);
 
@@ -614,10 +699,26 @@ $(document).ready(function() {
                 rewind(oldLoc, newLoc);
             }
 
-            checkmate();
-
         }
         // this is the closing tag of the drop event
+    });
+
+    $('.game-mode').on('click', function (){
+      if (computerPlay){
+        computerPlay = false;
+        $(this).text("Play A Friend");
+        if (confirm("Would you like to start a new game? Click OK to start a new game or cancel to have a friend pick up where the computer left off")){
+          location.reload();
+        }
+      } else {
+        computerPlay = true;
+        $(this).text("Play Computer");
+        alert("The Computer will continue playing for Black")
+        if(turn === "black"){
+          BlackMoves();
+        }
+      }
+
     });
 
 

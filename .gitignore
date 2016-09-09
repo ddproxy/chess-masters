@@ -6,4 +6,5 @@ Chess Masters_files/
 database.rules.json
 firebase.json
 npm-debug.log
-ls
+firebase-debug.log
+ls/

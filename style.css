@@ -59,11 +59,11 @@ p {
   transition: border 80ms;
 }
 
-.takeable {
+.going {
   border: 5px solid purple;
   transition: border 80ms;
 }
-.not-takeable {
+.starting {
   border: 5px solid gray;
   transition: border 80ms;
 }

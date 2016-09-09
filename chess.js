@@ -288,16 +288,10 @@ $(document).ready(function() {
                         sqChkNum = 100;
                     } else if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
                         Square[sqChkNum].validForOpponentArray.push(piece);
-                        if (emptyOrDiffColor(sqChkNum, loc)) {
-                            piece.validSquares.push(sqChkNum);
-                        }
                         sqChkNum = 100;
                     } else {
                         piece.threatining.push(Square[sqChkNum].piece.object);
                         Square[sqChkNum].validForOpponentArray.push(piece);
-                        if (emptyOrDiffColor(sqChkNum, loc)) {
-                            piece.validSquares.push(sqChkNum);
-                        }
                         sqChkNum = 100;
                     }
 
@@ -359,32 +353,20 @@ $(document).ready(function() {
                     } else
                     if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
                         Square[sqChkNum].validForPlayerArray.push(piece);
-                        if (emptyOrDiffColor(sqChkNum, loc)) {
-                            piece.validSquares.push(sqChkNum);
-                        }
                         sqChkNum = 100;
                     } else {
                         Square[sqChkNum].validForPlayerArray.push(piece)
-                        if (emptyOrDiffColor(sqChkNum, loc)) {
-                            piece.validSquares.push(sqChkNum);
-                        }
                         sqChkNum = 100;
                     }
 
                 } else if (piece.type === "pawn" && val % 10 === 0) {
                     if (piece.moveCounter < 1 && validSquareOnBoard(sqChkNum) && validSquare((sqChkNum + (val)), loc) && Square[sqChkNum].status.empty) {
-                        if (emptyOrDiffColor(sqChkNum, loc)) {
-                            piece.validSquares.push(sqChkNum);
-                        }
 
                         Square[sqChkNum].validForPlayerArray.push(piece);
                         Square[(sqChkNum + (val))].validForPlayerArray.push(piece);
                         sqChkNum = 100;
                     } else if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
                         Square[sqChkNum].validForPlayerArray.push(piece);
-                        if (emptyOrDiffColor(sqChkNum, loc)) {
-                            piece.validSquares.push(sqChkNum);
-                        }
                         sqChkNum = 100;
                     } else {
                         sqChkNum = 100;
@@ -418,15 +400,9 @@ $(document).ready(function() {
                     } else
                     if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
                         Square[sqChkNum].validForPlayerArray.push(piece);
-                        if (emptyOrDiffColor(sqChkNum, loc)) {
-                            piece.validSquares.push(sqChkNum);
-                        }
                         sqChkNum += val;
                     } else {
                         Square[sqChkNum].validForPlayerArray.push(piece);
-                        if (emptyOrDiffColor(sqChkNum, loc)) {
-                            piece.validSquares.push(sqChkNum);
-                        }
                         sqChkNum = 100;
                     }
                 }
@@ -490,6 +466,9 @@ $(document).ready(function() {
                 } else {
                     blkking.check === true;
                     alert("CHECK!")
+                    computerPlay = false;
+                    $('.game-mode').text("Playing A Friend");
+                    alert("I don't know how to get myself out of check can you please help?")
                 }
 
             } else if (Square[id].hasKing() === "white" || Square[id].hasKing() === "black") {
@@ -505,11 +484,62 @@ $(document).ready(function() {
             var x = confirm("I think you are in Checkmate, click cancel to continue");
             if (x === true) {
                 location.reload();
+            } else {
+              errorCount = 0
             }
         }
     }
 
+    function validMoveFiller() {
+        for (var i = 0; i < blackPieces.length; i++) {
+            var piece = blackPieces[i];
+            piece.validSquares = [];
+            piece.validIncrements.forEach(function(val, i) {
+                var oldSq = piece.sqNumber
+                var newSq = oldSq + val;
+                while (validSquareOnBoard(newSq)) {
+                    if (piece.type === "king" || piece.type === "knight") {
+                        if (emptyOrDiffColor(newSq, oldSq)) {
+                            piece.validSquares.push(newSq);
+                            newSq = 100;
+                        } else {
+                            newSq = 100;
+                        }
+                    } else if (piece.type === "pawn" && val % 10 === 0) {
+                        if (emptyOrDiffColor(newSq, oldSq)) {
+                            piece.validSquares.push(newSq);
+                            piece.validSquares.push(newSq + val);
+                            newSq = 100;
+                        } else {
+                            newSq = 100;
+                        }
+
+                    } else if (piece.type === "pawn" && val % 10 !== 0) {
+                        if (emptyOrDiffColor(newSq, oldSq) && Square[newSq].status.empty === false) {
+                            piece.validSquares.push(newSq);
+                            newSq = 100;
+                        } else {
+                            newSq = 100;
+                        }
+
+                    } else {
+                        if (emptyOrDiffColor(newSq, oldSq)) {
+                            piece.validSquares.push(newSq);
+                            newSq += val;
+                        } else {
+                            newSq = 100;
+                        }
+
+                    }
+                }
+            });
+        }
+    }
+
     function BlackMoves() {
+      $(".square").removeClass('starting');
+      $(".square").removeClass('going');
+        validMoveFiller();
         var movable = [];
         for (var i = 0; i < 16; i++) {
             var bpiece = blackPieces[i];
@@ -518,16 +548,16 @@ $(document).ready(function() {
             }
         }
         var piecePicker = Math.floor(Math.random() * (movable.length));
-        console.log(piecePicker);
         var selectPiece = movable[piecePicker];
-        console.log(selectPiece);
+        setTimeout(function() {
+            Square[selectPiece.sqNumber].location.addClass('going');
+        }, 400)
+
         var SquarePicker = Math.floor(Math.random() * (selectPiece.validSquares.length));
-        console.log(SquarePicker);
         var selectSquare = selectPiece.validSquares[SquarePicker];
-        console.log(selectSquare);
         setTimeout(function() {
             try {
-              errorCount = 0;
+
                 if (selectPiece.threatining.length > 0) {
                     selectPiece.place(selectPiece.threatining[0].sqNumber, selectPiece.sqNumber);
                     allPieceCheck();
@@ -546,21 +576,20 @@ $(document).ready(function() {
                         checkForCheck();
                     }
                 } else {
-                  throw "computer made a bad move its trying again"
+                    throw "computer made a bad move its trying again"
                 }
             } catch (e) {
                 alert(e);
                 errorCount++
                 console.log(errorCount);
-                if (event.target.classList.contains('chess-piece')) {
-                    rewindCapture(oldLoc, newLoc);
-                } else {
-                    rewind(oldLoc, newLoc);
-                }
+
+                    rewind(selectPiece.sqNumber, selectSquare);
+
 
             }
-        }, 1000)
+        }, 1200)
     }
+
 
 
 
@@ -571,6 +600,8 @@ $(document).ready(function() {
         $(".square").removeClass('highlighted');
         $(".square").removeClass('capture');
         $(".square").removeClass('protected');
+        $(".square").removeClass('starting');
+        $(".square").removeClass('going');
 
         if (Square[loc].status.empty === false && colorChecker(event)) {
             piece.validIncrements.forEach(function(val, i) {
@@ -662,10 +693,11 @@ $(document).ready(function() {
         var oldLoc = parseInt(dragged.getAttribute('id'));
         var newLoc = parseInt(event.target.getAttribute('id'));
         try {
-          errorCount = 0;
+
             if (colorChecker(oldEvent)) {
                 if (event.target.classList.contains('highlighted')) {
                     Square[oldLoc].piece.object.place(newLoc, oldLoc);
+
                 } else if (event.target == dragged) {
                     dragged.style.opacity = 1;
                 } else if (event.target.classList.contains('chess-piece') && event.target.parentNode.classList.contains('capture')) {
@@ -673,6 +705,7 @@ $(document).ready(function() {
                     Square[newLoc].piece.object.previousSquares.push(newLoc);
                     Square[newLoc].setToEmpty();
                     Square[oldLoc].piece.object.place(newLoc, oldLoc);
+
                 }
             } else {
                 $('.turn-billboard').text("Not Your Turn");
@@ -684,14 +717,14 @@ $(document).ready(function() {
             }
             allPieceCheck();
             checkForCheck();
-            if (computerPlay === true){
-            BlackMoves();
-          }
+            if (computerPlay === true) {
+                BlackMoves();
+            }
 
         } catch (e) {
             alert(e);
 
-            errorCount++
+            errorCount+=2
             console.log(errorCount);
             if (event.target.classList.contains('chess-piece')) {
                 rewindCapture(oldLoc, newLoc);
@@ -701,23 +734,24 @@ $(document).ready(function() {
 
         }
         // this is the closing tag of the drop event
+        checkmate();
     });
 
-    $('.game-mode').on('click', function (){
-      if (computerPlay){
-        computerPlay = false;
-        $(this).text("Play A Friend");
-        if (confirm("Would you like to start a new game? Click OK to start a new game or cancel to have a friend pick up where the computer left off")){
-          location.reload();
+    $('.game-mode').on('click', function() {
+        if (computerPlay) {
+            computerPlay = false;
+            $(this).text("Playing A Friend");
+            if (confirm("Would you like to start a new game? Click OK to start a new game or cancel to have a friend pick up where the computer left off")) {
+                location.reload();
+            }
+        } else {
+            computerPlay = true;
+            $(this).text("Playing Computer");
+            alert("The Computer will continue playing for Black")
+            if (turn === "black") {
+                BlackMoves();
+            }
         }
-      } else {
-        computerPlay = true;
-        $(this).text("Play Computer");
-        alert("The Computer will continue playing for Black")
-        if(turn === "black"){
-          BlackMoves();
-        }
-      }
 
     });
 

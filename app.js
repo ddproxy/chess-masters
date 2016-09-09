@@ -15,7 +15,7 @@ $(document).ready(function() {
     var blackPieces = [];
     var whitePieces = [];
     var id = 81;
-    var game.piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
+    var piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
     var turn = "white";
     var computerColor = "black";
     var odd = true;
@@ -90,9 +90,7 @@ $(document).ready(function() {
                 location: $('#' + id),
                 validForOpponentArray: [],
                 validForPlayerArray: [],
-                protection: {
-                    protecting: [],
-                    protectedby: [],
+                protectedby: [];
                 },
                 status: {
                     empty: true,
@@ -208,8 +206,8 @@ $(document).ready(function() {
     // *********************************ADD PIECES***************************************
 
     // add pieces to the board loop maybe wrap this in a function later
-    for (var i = 0; i < game.piecesArray.length; i++) {
-        var game.chessPiece = game.piecesArray[i];
+    for (var i = 0; i < piecesArray.length; i++) {
+        var game.chessPiece = piecesArray[i];
 
 
         // make the pawns

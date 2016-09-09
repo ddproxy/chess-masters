@@ -54,6 +54,15 @@ p {
   transition: border 80ms;
 }
 
+.takeable {
+  border: 5px solid purple;
+  transition: border 80ms;
+}
+.not-takeable {
+  border: 5px solid gray;
+  transition: border 80ms;
+}
+
 .capture{
   border: 5px solid red;
   transition: border 80ms;

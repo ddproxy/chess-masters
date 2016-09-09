@@ -1,166 +1,166 @@
 $(document).ready(function() {
 
-var Square = {};
-var pawnMoves = [10, 9, 11];
-var pawnMovesNegative = [-10, -9, -11];
-var rookMoves = [1, -1, 10, -10];
-var knightMoves = [8, -8, 12, -12, 19, -19, 21, -21];
-var bishopMoves = [9, -9, 11, -11];
-var queenMoves = [1, -1, 9, -9, 10, -10, 11, -11];
-var kingMoves = [1, -1, 9, -9, 10, -10, 11, -11];
-var blackPieces = [];
-var whitePieces = [];
-var squareCounter = 81;
-var piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
-var turn = "white";
-var computerColor = "black";
-var odd = true;
-var dragged;
-var oldEvent;
-var gamePlays = [];
+    var Square = {};
+    var pawnMoves = [10, 9, 11];
+    var pawnMovesNegative = [-10, -9, -11];
+    var rookMoves = [1, -1, 10, -10];
+    var knightMoves = [8, -8, 12, -12, 19, -19, 21, -21];
+    var bishopMoves = [9, -9, 11, -11];
+    var queenMoves = [1, -1, 9, -9, 10, -10, 11, -11];
+    var kingMoves = [1, -1, 9, -9, 10, -10, 11, -11];
+    var blackPieces = [];
+    var whitePieces = [];
+    var squareCounter = 81;
+    var piecesArray = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
+    var turn = "white";
+    var computerColor = "black";
+    var odd = true;
+    var dragged;
+    var oldEvent;
+    var gamePlays = [];
+    var errorCount = 0;
 
-var Piece = function(id, color, svg, arr, start, pieceType) {
-    this.sqNumber = start;
-    this.name = id;
-    this.type = pieceType;
-    this.color = color;
-    this.id = $('#' + id);
-    this.img = svg;
-    this.validIncrements = arr;
+    var Piece = function(id, color, svg, arr, start, pieceType) {
+        this.sqNumber = start;
+        this.name = id;
+        this.type = pieceType;
+        this.color = color;
+        this.id = $('#' + id);
+        this.img = svg;
+        this.validIncrements = arr;
 
-    this.start = function(num) {
-        Square[num].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + num + '" />'));
-        Square[num].status[color] = true;
-        Square[num].status.empty = false;
-        Square[num].piece.object = this;
-        Square[num].piece.jQuery = this.id;
-    };
-
-    this.place = function(num, old) {
-        Square[num].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + num + '" />'));
-        Square[num].status.empty = false;
-        Square[num].piece.object = this;
-        this.coordinates = Square[num].coordinates;
-        this.sqNumber = num;
-        this.previousSquares.push(old);
-        Square[old].piece.history.push(this);
-        Square[old].setToEmpty()
-        console.log(this.name + " has been in the following squares: ");
-        console.log(this.previousSquares);
-        console.log("square " + old + " has had the following in it: ");
-        console.log(Square[old].piece.history);
-        if (turn === 'white') {
-            turn = 'black';
-            $('.turn-billboard').text(turn);
-            $('.turn-billboard').css({
-                'background-color': 'gray',
-                'color': 'black',
-                'text-shadow': '3px -3px 10px white'
-            });
-        } else {
-            turn = 'white';
-            $('.turn-billboard').text(turn);
-            $('.turn-billboard').css({
-                'background-color': 'gray',
-                'color': 'white',
-                'text-shadow': '3px -3px 10px black'
-            });
-        }
-
-    };
-
-
-    this.start(start);
-    this.previousSquares = [];
-    this.coordinates = Square[start].coordinates;
-    this.threatining = [];
-    this.validSquares = [];
-    if (this.color === "white") {
-        whitePieces.push(this);
-    } else {
-        blackPieces.push(this);
-    };
-
-};
-
-function makeBoard(num) {
-    // make the board
-    for (var i = 0; i < 8; i++) {
-        for (var j = 0; j < 8; j++) {
-            $('.board').append('<div class="square" id="' + num + '" </div>');
-            num++;
+        this.start = function(num) {
+            Square[num].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + num + '" />'));
+            Square[num].status[color] = true;
+            Square[num].status.empty = false;
+            Square[num].piece.object = this;
+            Square[num].piece.jQuery = this.id;
         };
-        num = num - 18;
-    };
 
-    // give it the right backgrounds
-    num = 81;
-    for (var i = 0; i < 8; i++) {
-        odd = !(odd);
-        for (var j = 0; j < 8; j++) {
-            if (odd) {
-                $('#' + num).css({
-                    "background-image": "url('./images/dark-bg.jpeg')"
+        this.place = function(num, old) {
+            Square[num].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + num + '" />'));
+            Square[num].status.empty = false;
+            Square[num].piece.object = this;
+            this.coordinates = Square[num].coordinates;
+            this.sqNumber = num;
+            this.previousSquares.push(old);
+            Square[old].piece.history.push(this);
+            Square[old].setToEmpty()
+            if (turn === 'white') {
+                turn = 'black';
+                $('.turn-billboard').text(turn);
+                $('.turn-billboard').css({
+                    'background-color': 'gray',
+                    'color': 'black',
+                    'text-shadow': '3px -3px 10px white'
                 });
-                odd = false;
             } else {
-                $('#' + num).css({
-                    "background-image": "url('./images/light-bg.jpeg')"
+                turn = 'white';
+                $('.turn-billboard').text(turn);
+                $('.turn-billboard').css({
+                    'background-color': 'gray',
+                    'color': 'white',
+                    'text-shadow': '3px -3px 10px black'
                 });
-                odd = true;
             }
-            num++;
+
         };
-        num = num - 18;
+
+
+        this.start(start);
+        this.previousSquares = [];
+        this.coordinates = Square[start].coordinates;
+        this.threatining = [];
+        this.validSquares = [];
+        if (this.color === "white") {
+            whitePieces.push(this);
+        } else {
+            blackPieces.push(this);
+        };
+
     };
 
-    // make objects
-    num = 81;
-    for (var i = 0; i < 8; i++) {
-        for (var j = 0; j < 8; j++) {
-            Square[num] = {
-                location: $('#' + num),
-                validForOpponentArray: [],
-                validForPlayerArray: [],
-                status: {
-                    empty: true
-                },
-                piece: {
-                    object: undefined,
-                    history: []
-                },
-                coordinates: '' + String.fromCharCode((0 - i) + 104) + (j + 1) + '',
-                setToEmpty: function() {
-                    this.status.empty = true;
-                    this.piece.object = undefined;
-                    this.location.empty();
-                },
-                clear: function() {
-                    this.validForOpponentArray = [];
-                    this.validForPlayerArray = [];
-                },
-                hasKing: function() {
-                    if (this.status.empty === false) {
-                        if (this.piece.object.type === 'king') {
-                            return this.piece.object.color;
-                        } else {
-                            return false;
-                        }
-                    }
-
-                },
+    function makeBoard(num) {
+        // make the board
+        for (var i = 0; i < 8; i++) {
+            for (var j = 0; j < 8; j++) {
+                $('.board').append('<div class="square" id="' + num + '" </div>');
+                num++;
             };
-            num++;
+            num = num - 18;
         };
-        num = num - 18;
+
+        // give it the right backgrounds
+        num = 81;
+        for (var i = 0; i < 8; i++) {
+            odd = !(odd);
+            for (var j = 0; j < 8; j++) {
+                if (odd) {
+                    $('#' + num).css({
+                        "background-image": "url('./images/dark-bg.jpeg')"
+                    });
+                    odd = false;
+                } else {
+                    $('#' + num).css({
+                        "background-image": "url('./images/light-bg.jpeg')"
+                    });
+                    odd = true;
+                }
+                num++;
+            };
+            num = num - 18;
+        };
+
+        // make objects
+        num = 81;
+        for (var i = 0; i < 8; i++) {
+            for (var j = 0; j < 8; j++) {
+                Square[num] = {
+                    location: $('#' + num),
+                    validForOpponentArray: [],
+                    validForPlayerArray: [],
+                    protection: {
+                        protecting: [],
+                        protectedby: [],
+                    },
+                    status: {
+                        empty: true
+                    },
+                    piece: {
+                        object: undefined,
+                        history: []
+                    },
+                    coordinates: '' + String.fromCharCode((0 - i) + 104) + (j + 1) + '',
+                    setToEmpty: function() {
+                        this.status.empty = true;
+                        this.piece.object = undefined;
+                        this.location.empty();
+                    },
+                    clear: function() {
+                        this.validForOpponentArray = [];
+                        this.validForPlayerArray = [];
+                    },
+                    hasKing: function() {
+                        if (this.status.empty === false) {
+                            if (this.piece.object.type === 'king') {
+                                return this.piece.object.color;
+                            } else {
+                                return false;
+                            }
+                        }
+
+                    },
+                };
+                num++;
+            };
+            num = num - 18;
+        };
+
     };
+    makeBoard(81);
 
-};
-makeBoard(81);
-
-function makePieces(arr) {
-    for (var i = 0; i < arr.length; i++) {
-        var chessPiece = arr[i];
+    for (var i = 0; i < piecesArray.length; i++) {
+        var chessPiece = piecesArray[i];
 
 
         // make the pawns
@@ -211,75 +211,177 @@ function makePieces(arr) {
             whtking.check = false;
             blkking.check = false;
         }
-    }
-};
-makePieces(piecesArray);
+    };
 
-$('.turn-billboard').text(turn);
 
-function validSquareOnBoard(num) {
 
-    // not a square on the board return false
-    if (!(num > 10 && num < 89 && num % 10 !== 0 && (num + 1) % 10 !== 0)) {
-        return false;
-    } else {
-        return true;
-    }
-};
 
-function colorChecker(e) {
-    try {
-        var num = parseInt(e.target.getAttribute('id'));
-        var color = Square[num].piece.object.color;
-        return (color === turn);
+    $('.turn-billboard').text(turn);
 
-    } catch (e) {}
-};
+    function validSquareOnBoard(num) {
 
-$('.board').on('mouseenter', '.square', function(event) {
-    var loc = parseInt(event.target.getAttribute('id'));
-    var piece = Square[loc].piece.object;
-    $(".square").removeClass('highlighted');
-    $(".square").removeClass('capture');
-    $(".square").removeClass('protected');
-    if (Square[loc].status.empty === false && colorChecker(event)) {
+        // not a square on the board return false
+        if (!(num > 10 && num < 89 && num % 10 !== 0 && (num + 1) % 10 !== 0)) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    function colorChecker(e) {
+        try {
+            var num = parseInt(e.target.getAttribute('id'));
+            var color = Square[num].piece.object.color;
+            return (color === turn);
+
+        } catch (e) {}
+    };
+
+    function rewindCapture(fromSquare, toSquare) {
+        var pieceArr = Square[fromSquare].piece.history
+        var lastPiece = pieceArr[pieceArr.length - 1]
+        lastPiece.place(fromSquare, toSquare)
+        pieceArr.pop();
+        pieceArr.pop();
+        lastPiece.previousSquares.pop();
+        lastPiece.previousSquares.pop();
+
+        pieceArr = Square[toSquare].piece.history
+        lastPiece = pieceArr[pieceArr.length - 2]
+        lastPiece.start(toSquare);
+        pieceArr.pop();
+        pieceArr.pop();
+        lastPiece.previousSquares.pop();
+        lastPiece.previousSquares.pop();
+    };
+
+    function rewind(fromSquare, toSquare) {
+        var pieceArr = Square[fromSquare].piece.history
+        var lastPiece = pieceArr[pieceArr.length - 1]
+        lastPiece.place(fromSquare, toSquare)
+        pieceArr.pop();
+        pieceArr.pop();
+        lastPiece.previousSquares.pop();
+        lastPiece.previousSquares.pop();
+    };
+
+    function emptyOrDiffColor(chkNum, orig) {
+        try {
+            return !(Square[chkNum].piece.object.color === Square[orig].piece.object.color);
+        } catch (e) {
+            return true;
+        };
+    };
+
+    var validForOpponent = function(piece) {
+        piece.threatining = [];
+
+        var loc = piece.sqNumber;
+        piece.validIncrements.forEach(function(val, i) {
+            var sqChkNum = loc + val;
+
+            while (validSquareOnBoard(sqChkNum)) {
+                if (piece.type === "king" || piece.type === "knight") {
+                    if (!(emptyOrDiffColor(sqChkNum, loc))) {
+                        Square[sqChkNum].protection.protectedby.push(Square[loc].piece.object);
+                        Square[loc].protection.protecting.push(Square[sqChkNum].piece.object);
+                        sqChkNum = 100;
+                    } else if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
+                        Square[sqChkNum].validForOpponentArray.push(piece);
+                        sqChkNum = 100;
+                    } else {
+                        piece.threatining.push(Square[sqChkNum].piece.object);
+                        Square[sqChkNum].validForOpponentArray.push(piece);
+                        sqChkNum = 100;
+                    }
+
+                } else if (piece.type === "pawn" && val % 10 === 0) {
+                    sqChkNum = 100;
+
+                } else if (piece.type === "pawn" && val % 10 !== 0) {
+                    if (!(emptyOrDiffColor(sqChkNum, loc))) {
+                        Square[sqChkNum].protection.protectedby.push(Square[loc].piece.object);
+                        Square[loc].protection.protecting.push(Square[sqChkNum].piece.object);
+                        sqChkNum = 100;
+                    } else if (validSquareOnBoard(sqChkNum)) {
+                        if (!(Square[sqChkNum].status.empty)) {
+
+                            piece.threatining.push(Square[sqChkNum].piece.object);
+                            Square[sqChkNum].validForOpponentArray.push(piece);
+                            sqChkNum = 100;
+                        } else {
+
+                            Square[sqChkNum].validForOpponentArray.push(piece);
+                            sqChkNum = 100;
+                        }
+                    } else {
+                        sqChkNum = 100;
+                    }
+                } else {
+                    if (!(emptyOrDiffColor(sqChkNum, loc))) {
+                        Square[sqChkNum].protection.protectedby.push(Square[loc].piece.object);
+                        Square[loc].protection.protecting.push(Square[sqChkNum].piece.object);
+                        sqChkNum = 100;
+                    } else if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
+
+                        Square[sqChkNum].validForOpponentArray.push(piece);
+                        sqChkNum += val;
+                    } else {
+                        piece.threatining.push(Square[sqChkNum].piece.object[0]);
+                        Square[sqChkNum].validForOpponentArray.push(piece);
+                        sqChkNum = 100;
+                    }
+                }
+            }
+
+        });
+
+
+    };
+
+    var validFor = function(piece) {
+        var loc = piece.sqNumber;
+
         piece.validIncrements.forEach(function(val, i) {
             var sqChkNum = loc + val;
             while (validSquareOnBoard(sqChkNum)) {
                 if (piece.type === "king" || piece.type === "knight") {
+                    if (!(emptyOrDiffColor(sqChkNum, loc))) {
+                        Square[sqChkNum].protection.protectedby.push(Square[loc].piece.object);
+                        Square[loc].protection.protecting.push(Square[sqChkNum].piece.object);
+                        sqChkNum = 100;
+                    } else
                     if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
-                        Square[sqChkNum].location.addClass("highlighted");
+                        Square[sqChkNum].validForPlayerArray.push(piece)
                         sqChkNum = 100;
                     } else {
-                        if (Square[sqChkNum].piece.object.color === turn) {
-                            Square[sqChkNum].location.addClass("protected");
-                            sqChkNum = 100;
-                        } else {
-                            Square[sqChkNum].location.addClass("capture");
-                            sqChkNum = 100;
-                        }
+                        Square[sqChkNum].validForPlayerArray.push(piece)
+                        sqChkNum = 100;
                     }
+
                 } else if (piece.type === "pawn" && val % 10 === 0) {
-                    if (piece.previousSquares.length < 1 && validSquareOnBoard(sqChkNum) && validSquareOnBoard((sqChkNum + (val))) && Square[sqChkNum].status.empty) {
-                        Square[sqChkNum].location.addClass("highlighted");
-                        Square[(sqChkNum + (val))].location.addClass("highlighted");
+                    if (piece.moveCounter < 1 && validSquareOnBoard(sqChkNum) && validSquare((sqChkNum + (val)), loc) && Square[sqChkNum].status.empty) {
+                        Square[sqChkNum].validForPlayerArray.push(piece)
+                        Square[(sqChkNum + (val))].validForPlayerArray.push(piece)
                         sqChkNum = 100;
                     } else if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
-                        Square[sqChkNum].location.addClass("highlighted");
+                        Square[sqChkNum].validForPlayerArray.push(piece)
                         sqChkNum = 100;
                     } else {
                         sqChkNum = 100;
                     }
+
                 } else if (piece.type === "pawn" && val % 10 !== 0) {
+                    if (!(emptyOrDiffColor(sqChkNum, loc))) {
+                        Square[sqChkNum].protection.protectedby.push(Square[loc].piece.object);
+                        Square[loc].protection.protecting.push(Square[sqChkNum].piece.object);
+                        sqChkNum = 100;
+                    } else
                     if (validSquareOnBoard(sqChkNum)) {
                         if (!(Square[sqChkNum].status.empty)) {
-                            if (Square[sqChkNum].piece.object.color === turn) {
-                                Square[sqChkNum].location.addClass("protected");
-                                sqChkNum = 100;
-                            } else {
-                                Square[sqChkNum].location.addClass("capture");
-                                sqChkNum = 100;
-                            }
+
+                            Square[sqChkNum].validForPlayerArray.push(piece)
+                            sqChkNum = 100;
                         } else {
                             sqChkNum = 100;
                         }
@@ -287,81 +389,244 @@ $('.board').on('mouseenter', '.square', function(event) {
                         sqChkNum = 100;
                     }
                 } else {
+                    if (!(emptyOrDiffColor(sqChkNum, loc))) {
+                        Square[sqChkNum].protection.protectedby.push(Square[loc].piece.object);
+                        Square[loc].protection.protecting.push(Square[sqChkNum].piece.object);
+                        sqChkNum = 100;
+                    } else
                     if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
-                        Square[sqChkNum].location.addClass("highlighted");
+                        Square[sqChkNum].validForPlayerArray.push(piece)
                         sqChkNum += val;
                     } else {
-                        if (Square[sqChkNum].piece.object.color === turn) {
-                            Square[sqChkNum].location.addClass("protected");
-                            sqChkNum = 100;
-                        } else {
-                            Square[sqChkNum].location.addClass("capture");
-                            sqChkNum = 100;
-                        }
+                        Square[sqChkNum].validForPlayerArray.push(piece)
+                        sqChkNum = 100;
                     }
                 }
             }
         });
-    }
-});
 
-//dragging pieces
-$('.board').on('dragstart', '.chess-piece', function(event) {
-    oldEvent = event;
-    oldSquare = event.target.parentNode;
-    dragged = event.target;
-    if (colorChecker(event)) {
-        dragged.style.opacity = .5;
-    }
-});
 
-//original opacity when dropped
-$('.board').on('dragend', function(event) {
-    event.preventDefault();
-    dragged.style.opacity = 1;
-});
 
-//dim while dragging
-$('.board').on('dragover', function(event) {
-    event.preventDefault();
-});
+    };
 
-//dropping the piece is the event that changes most of the game state
-$('.board').on('drop', function(event) {
-    event.preventDefault();
-    var oldLoc = parseInt(dragged.getAttribute('id'));
-    var newLoc = parseInt(event.target.getAttribute('id'));
+    function validSquare(chkNum, orig) {
 
-    if (colorChecker(oldEvent)) {
-        if (event.target.classList.contains('highlighted')) {
-            Square[oldLoc].piece.object.place(newLoc, oldLoc);
-        } else if (event.target == dragged) {
-            dragged.style.opacity = 1;
-        } else if (event.target.classList.contains('chess-piece') && event.target.parentNode.classList.contains('capture')) {
-            Square[newLoc].piece.history.push(Square[newLoc].piece.object);
-            Square[newLoc].piece.object.previousSquares.push(newLoc);
-            Square[newLoc].setToEmpty();
-            Square[oldLoc].piece.object.place(newLoc, oldLoc);
+        // not a square on the board return false
+        if (!(chkNum > 10 && chkNum < 89 && chkNum % 10 !== 0 && (chkNum + 1) % 10 !== 0)) {
+            return false;
+            // square contains a piece that is the same color as the clicked color
+
+        } else if (!(emptyOrDiffColor(chkNum, orig))) {
+            return false;
+        } else {
+            return true;
         }
-    }
+    };
 
-    // this is the closing tag of the drop event
-});
-
-
-// pieceArr = Square[num].piece.history
-// var lastPiece = pieceArr[pieceArr.length - 1]
-// var lastSqNumber = lastPiece.previousSquares[(lastPiece.previousSquares.length - 1)]
-// lastPiece.place(lastSqNumber, 45) pieceArr.pop();
-// pieceArr.pop();
-
-
-
+    var resetAllSquareArrays = function() {
+        id = 81;
+        for (var i = 0; i < 8; i++) {
+            for (var j = 0; j < 8; j++) {
+                Square[id].clear()
+                id++;
+            };
+            id = id - 18;
+        };
+    };
 
 
+    var allPieceCheck = function() {
+        resetAllSquareArrays();
+        for (var i = 0; i < 16; i++) {
+            var bpiece = blackPieces[i];
+            var wpiece = whitePieces[i];
+            if (turn === "white") {
+                validFor(wpiece);
+                validForOpponent(bpiece);
+            } else if (turn === 'black') {
+                validFor(bpiece);
+                validForOpponent(wpiece);
+            }
+        };
+    };
+
+    var checkForCheck = function(callback) {
+        for (var id in Square) {
+            if (Square[id].hasKing() === turn && Square[id].validForOpponentArray.length > 0) {
+                if (turn === "white") {
+                    whtking.check === true;
+                    alert("CHECK!")
+                } else {
+                    blkking.check === true;
+                    alert("CHECK!")
+                }
+
+            } else if (Square[id].hasKing() === "white" || Square[id].hasKing() === "black") {
+                if (Square[id].validForPlayerArray.length > 0) {
+                    throw "You've put yourself in check"
+                }
+            }
+        }
+    };
+
+    function checkmate() {
+        if (errorCount > 5){
+          var x = confirm("I think you are in Checkmate, click cancel to continue");
+          if (x === true){
+            location.reload();
+          }
+        }
+      }
 
 
 
 
-// this is the closing tag
+
+    $('.board').on('mouseenter', '.square', function(event) {
+        var loc = parseInt(event.target.getAttribute('id'));
+        var piece = Square[loc].piece.object;
+        $(".square").removeClass('highlighted');
+        $(".square").removeClass('capture');
+        $(".square").removeClass('protected');
+        if (Square[loc].status.empty === false && colorChecker(event)) {
+            piece.validIncrements.forEach(function(val, i) {
+                var sqChkNum = loc + val;
+                while (validSquareOnBoard(sqChkNum)) {
+                    if (piece.type === "king" || piece.type === "knight") {
+                        if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
+                            Square[sqChkNum].location.addClass("highlighted");
+                            sqChkNum = 100;
+                        } else {
+                            if (Square[sqChkNum].piece.object.color === turn) {
+                                Square[sqChkNum].location.addClass("protected");
+                                sqChkNum = 100;
+                            } else {
+                                Square[sqChkNum].location.addClass("capture");
+                                sqChkNum = 100;
+                            }
+                        }
+                    } else if (piece.type === "pawn" && val % 10 === 0) {
+                        if (piece.previousSquares.length < 1 && validSquareOnBoard(sqChkNum) && validSquareOnBoard((sqChkNum + (val))) && Square[sqChkNum].status.empty) {
+                            Square[sqChkNum].location.addClass("highlighted");
+                            Square[(sqChkNum + (val))].location.addClass("highlighted");
+                            sqChkNum = 100;
+                        } else if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
+                            Square[sqChkNum].location.addClass("highlighted");
+                            sqChkNum = 100;
+                        } else {
+                            sqChkNum = 100;
+                        }
+                    } else if (piece.type === "pawn" && val % 10 !== 0) {
+                        if (validSquareOnBoard(sqChkNum)) {
+                            if (!(Square[sqChkNum].status.empty)) {
+                                if (Square[sqChkNum].piece.object.color === turn) {
+                                    Square[sqChkNum].location.addClass("protected");
+                                    sqChkNum = 100;
+                                } else {
+                                    Square[sqChkNum].location.addClass("capture");
+                                    sqChkNum = 100;
+                                }
+                            } else {
+                                sqChkNum = 100;
+                            }
+                        } else {
+                            sqChkNum = 100;
+                        }
+                    } else {
+                        if (validSquareOnBoard(sqChkNum) && Square[sqChkNum].status.empty) {
+                            Square[sqChkNum].location.addClass("highlighted");
+                            sqChkNum += val;
+                        } else {
+                            if (Square[sqChkNum].piece.object.color === turn) {
+                                Square[sqChkNum].location.addClass("protected");
+                                sqChkNum = 100;
+                            } else {
+                                Square[sqChkNum].location.addClass("capture");
+                                sqChkNum = 100;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    //dragging pieces
+    $('.board').on('dragstart', '.chess-piece', function(event) {
+        oldEvent = event;
+        oldSquare = event.target.parentNode;
+        dragged = event.target;
+        if (colorChecker(event)) {
+            dragged.style.opacity = .5;
+        }
+    });
+
+    //original opacity when dropped
+    $('.board').on('dragend', function(event) {
+        event.preventDefault();
+        dragged.style.opacity = 1;
+    });
+
+    //dim while dragging
+    $('.board').on('dragover', function(event) {
+        event.preventDefault();
+    });
+
+    //dropping the piece is the event that changes most of the game state
+    $('.board').on('drop', function(event) {
+        event.preventDefault();
+        var oldLoc = parseInt(dragged.getAttribute('id'));
+        var newLoc = parseInt(event.target.getAttribute('id'));
+        try {
+            if (colorChecker(oldEvent)) {
+                if (event.target.classList.contains('highlighted')) {
+                    Square[oldLoc].piece.object.place(newLoc, oldLoc);
+                } else if (event.target == dragged) {
+                    dragged.style.opacity = 1;
+                } else if (event.target.classList.contains('chess-piece') && event.target.parentNode.classList.contains('capture')) {
+                    Square[newLoc].piece.history.push(Square[newLoc].piece.object);
+                    Square[newLoc].piece.object.previousSquares.push(newLoc);
+                    Square[newLoc].setToEmpty();
+                    Square[oldLoc].piece.object.place(newLoc, oldLoc);
+                }
+            } else {
+                $('.turn-billboard').text("Not Your Turn");
+                $('.turn-billboard').css({
+                    'background-color': 'red',
+                    'color': 'black',
+                    'text-shadow': '3px -3px 10px white'
+                });
+            }
+            allPieceCheck();
+            checkForCheck();
+            console.log('these are the pieces that can take whtking');
+            console.log(Square[15].validForOpponentArray);
+            console.log('these are the pieces that can take blkking');
+            console.log(Square[85].validForOpponentArray);
+        } catch (e) {
+            alert(e);
+
+            errorCount++
+            console.log(errorCount);
+            if (event.target.classList.contains('chess-piece')) {
+                rewindCapture(oldLoc, newLoc);
+            } else {
+                rewind(oldLoc, newLoc);
+            }
+
+            checkmate();
+
+        }
+        // this is the closing tag of the drop event
+    });
+
+
+
+
+
+
+
+
+
+    // this is the closing tag
 });

@@ -30,7 +30,7 @@ $(document).ready(function() {
         this.validIncrements = arr;
 
         this.start = function(num) {
-            Square[num].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + num + '" />'));
+            Square[num].location.append($('<img class="chess-piece" draggable="true" data-content="blah blah blah" src="' + this.img + '" id="' + num + '" />'));
             Square[num].status[color] = true;
             Square[num].status.empty = false;
             Square[num].piece.object = this;
@@ -38,7 +38,7 @@ $(document).ready(function() {
         };
 
         this.place = function(num, old) {
-            Square[num].location.append($('<img class="chess-piece" draggable="true" src="' + this.img + '" id="' + num + '" />'));
+            Square[num].location.append($('<img class="chess-piece" draggable="true" data-content="blah blah blah" src="' + this.img + '" id="' + num + '" />'));
             Square[num].status.empty = false;
             Square[num].piece.object = this;
             this.coordinates = Square[num].coordinates;
@@ -462,10 +462,12 @@ $(document).ready(function() {
             if (Square[id].hasKing() === turn && Square[id].validForOpponentArray.length > 0) {
                 if (turn === "white") {
                     whtking.check === true;
-                    alert("CHECK!")
+                    // alert("CHECK!");
+                    $("#dialog").dialog();
                 } else {
                     blkking.check === true;
-                    alert("CHECK!")
+                    // alert("CHECK!");
+                    $(".chess-piece").popup({boundary: });
                     computerPlay = false;
                     $('.game-mode').text("Playing A Friend");
                     alert("I don't know how to get myself out of check can you please help?")
@@ -485,7 +487,7 @@ $(document).ready(function() {
             if (x === true) {
                 location.reload();
             } else {
-              errorCount = 0
+                errorCount = 0
             }
         }
     }
@@ -537,8 +539,8 @@ $(document).ready(function() {
     }
 
     function BlackMoves() {
-      $(".square").removeClass('starting');
-      $(".square").removeClass('going');
+        $(".square").removeClass('starting');
+        $(".square").removeClass('going');
         validMoveFiller();
         var movable = [];
         for (var i = 0; i < 16; i++) {
@@ -583,7 +585,7 @@ $(document).ready(function() {
                 errorCount++
                 console.log(errorCount);
 
-                    rewind(selectPiece.sqNumber, selectSquare);
+                rewind(selectPiece.sqNumber, selectSquare);
 
 
             }
@@ -724,7 +726,7 @@ $(document).ready(function() {
         } catch (e) {
             alert(e);
 
-            errorCount+=2
+            errorCount += 2
             console.log(errorCount);
             if (event.target.classList.contains('chess-piece')) {
                 rewindCapture(oldLoc, newLoc);

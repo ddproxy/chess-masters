@@ -12,6 +12,8 @@
 
 ###Bugs to be fixed:
 
+####Non-responsive - shrink browser to 80% for best view
+
 ####Computer Play Mode -
 
 * it will still move captured pieces,
@@ -24,3 +26,4 @@
 * To be able to play a computer that recognizes famous games situations and makes the best move.  (DEEP BLUE EMULATOR)
 * Animation of pieces
 * logic for castling and en passant
+* add socket functionality so two people can play

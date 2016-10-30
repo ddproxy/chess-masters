@@ -467,7 +467,6 @@ $(document).ready(function() {
                 } else {
                     blkking.check === true;
                     // alert("CHECK!");
-                    $(".chess-piece").popup({boundary: });
                     computerPlay = false;
                     $('.game-mode').text("Playing A Friend");
                     alert("I don't know how to get myself out of check can you please help?")
